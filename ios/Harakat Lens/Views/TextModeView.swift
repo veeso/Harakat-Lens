@@ -12,6 +12,9 @@ struct TextModeView: View {
     @State private var inputText: String = ""
     @State private var transliteratedText: String = ""
     @State private var translatedText: String = ""
+    @State private var quranMatch: QuranMatch?
+    @State private var matcher: QuranMatcher?
+    @State private var surahNames: [Int: SurahName] = [:]
     @State private var debounceTask: Task<Void, Never>?
     @State private var translateConfig: TranslationSession.Configuration?
 
@@ -40,6 +43,13 @@ struct TextModeView: View {
             VStack(alignment: .leading, spacing: AppDesign.sectionSpacing) {
                 arabicInputSection
                 transliterationOutputSection
+                if let match = quranMatch {
+                    QuranMatchView(
+                        match: match,
+                        surahName: surahName(for: match.ayah.surah)
+                    )
+                    .padding(.horizontal, AppDesign.horizontalPadding)
+                }
                 translationSection
             }
         }
@@ -142,9 +152,32 @@ struct TextModeView: View {
         guard !trimmed.isEmpty else {
             transliteratedText = ""
             translatedText = ""
+            quranMatch = nil
             return
         }
         transliteratedText = textProcessor.process(text: inputText) ?? ""
+
+        if settings.quranMode {
+            Task { await runQuranMatch(for: inputText) }
+        } else {
+            quranMatch = nil
+        }
+    }
+
+    @MainActor
+    private func runQuranMatch(for text: String) async {
+        let dataset = QuranDataset.shared
+        await dataset.loadIfNeeded()
+        if matcher == nil {
+            matcher = QuranMatcher(dataset: dataset)
+            surahNames = await dataset.surahNames
+        }
+        let match = await matcher?.match(text)
+        quranMatch = match
+    }
+
+    private func surahName(for surah: Int) -> SurahName? {
+        surahNames[surah]
     }
 
     private func pasteFromClipboard() {
