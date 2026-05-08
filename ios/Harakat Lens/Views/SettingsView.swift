@@ -16,7 +16,7 @@ struct SettingsView: View {
                 name: Locale.current.localizedString(forIdentifier: id) ?? id
             )
         }
-        .sorted { $0.name < $1.name }
+        .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
 
     var body: some View {
         @Bindable var settings = settings

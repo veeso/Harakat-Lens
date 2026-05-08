@@ -108,11 +108,11 @@ struct TextModeView: View {
     }
 
     private func triggerTranslation() {
-        guard translateConfig == nil else {
+        if translateConfig != nil {
             translateConfig?.invalidate()
+            translateConfig = nil
             return
         }
-
         translateConfig = .init(
             source: .init(identifier: "ar"),
             target: .init(identifier: settings.userLanguage)
