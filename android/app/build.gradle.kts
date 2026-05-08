@@ -14,8 +14,8 @@ android {
         applicationId = "dev.veeso.harakatlens"
         minSdk = 26
         targetSdk = 36
-        versionCode = 31
-        versionName = "0.3.1"
+        versionCode = 10
+        versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
