@@ -32,11 +32,11 @@ struct CameraLiveView: View {
                 }
 
                 ForEach(cameraModel.recognizedTexts) { box in
-                    if let pinyin = cameraModel.pinyinMap[box.id] {
+                    if let translit = cameraModel.transliterationMap[box.id] {
                         RecognizedTextOverlay(
                             cameraModel: cameraModel,
-                            hanzi: box.text,
-                            pinyin: pinyin,
+                            arabic: box.text,
+                            transliteration: translit,
                             boundingBox: box,
                             viewSize: geo.size
                         )
@@ -122,7 +122,7 @@ struct CameraLiveView: View {
                     action: cameraModel.deleteCapturedImage
                 )
             } else {
-                togglePinyinButton
+                toggleTransliterationButton
                 CircularIconButton(
                     title: "Take photo",
                     systemImage: "camera.fill",
@@ -134,9 +134,9 @@ struct CameraLiveView: View {
         .padding(.bottom, AppDesign.bottomToolbarPadding)
     }
 
-    private var togglePinyinButton: some View {
+    private var toggleTransliterationButton: some View {
         Button {
-            cameraModel.showPinyin.toggle()
+            cameraModel.showTransliteration.toggle()
         } label: {
             Image("Harakat")
                 .resizable()
@@ -147,7 +147,7 @@ struct CameraLiveView: View {
                 .background(
                     Circle()
                         .fill(
-                            cameraModel.showPinyin
+                            cameraModel.showTransliteration
                                 ? AppDesign.brandGreen.opacity(0.8)
                                 : Color.gray.opacity(0.8)
                         )
@@ -156,9 +156,9 @@ struct CameraLiveView: View {
         }
         .animation(
             .easeInOut(duration: AppDesign.shortAnimation),
-            value: cameraModel.showPinyin
+            value: cameraModel.showTransliteration
         )
-        .accessibilityLabel("Toggle Pinyin")
+        .accessibilityLabel("Toggle transliteration")
     }
 
     private var galleryPickerButton: some View {

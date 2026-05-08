@@ -2,7 +2,7 @@
 //  RecognizedTextOverlay.swift
 //  Harakat Lens
 //
-//  Tappable overlay rendered on top of recognized Hanzi or its pinyin.
+//  Tappable overlay rendered on top of recognized Arabic or its transliteration.
 //
 
 import AVFoundation
@@ -14,8 +14,8 @@ struct RecognizedTextOverlay: View {
     @State private var measuredSize: CGSize = .zero
 
     let cameraModel: CameraModel
-    let hanzi: String
-    let pinyin: String
+    let arabic: String
+    let transliteration: String
     let boundingBox: RecognizedTextBox
     let viewSize: CGSize
 
@@ -26,10 +26,10 @@ struct RecognizedTextOverlay: View {
 
     var body: some View {
         let frame = visionToViewRect(boundingBox.boundingBox, in: viewSize)
-        let textToDisplay = cameraModel.showPinyin ? pinyin : hanzi
+        let textToDisplay = cameraModel.showTransliteration ? transliteration : arabic
         let scaleRatio =
-            cameraModel.showPinyin
-                ? CGFloat(hanzi.count) / CGFloat(max(pinyin.count, 1)) : 1.0
+            cameraModel.showTransliteration
+                ? CGFloat(arabic.count) / CGFloat(max(transliteration.count, 1)) : 1.0
         let scaleFactor = min(max(scaleRatio, 0.6), 1.0)
         let fontSize = max(Self.minFontSize, frame.height * scaleFactor)
 
