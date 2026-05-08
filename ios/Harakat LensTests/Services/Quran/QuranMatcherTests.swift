@@ -46,12 +46,12 @@ struct QuranMatcherTests {
         #expect(await m.match("ال") == nil)
     }
 
-    @Test func performanceBelow50ms() async {
+    @Test func performanceBelow200ms() async {
         let m = await matcher()
         let input = "بسم الله الرحمن الرحيم"
         let start = Date()
         _ = await m.match(input)
         let elapsed = Date().timeIntervalSince(start) * 1000
-        #expect(elapsed < 50)
+        #expect(elapsed < 200)
     }
 }

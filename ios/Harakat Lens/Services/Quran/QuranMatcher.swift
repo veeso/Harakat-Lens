@@ -60,6 +60,7 @@ actor QuranMatcher {
         // 3. Levenshtein scoring on candidates.
         var best: QuranMatch?
         for index in candidateSet {
+            guard index < all.count else { continue }
             let ayah = all[index]
             let distance = Self.levenshtein(norm, ayah.normalized)
             let maxLen = max(norm.count, ayah.normalized.count)
