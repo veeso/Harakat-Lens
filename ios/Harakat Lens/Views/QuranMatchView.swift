@@ -1,0 +1,115 @@
+//
+//  QuranMatchView.swift
+//  Harakat Lens
+//
+
+import SwiftUI
+
+struct QuranMatchView: View {
+    let match: QuranMatch
+    let surahName: SurahName?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppDesign.stackSpacing) {
+            QuranMatchHeaderView(match: match, surahName: surahName)
+            Text(match.ayah.text)
+                .font(.title2)
+                .multilineTextAlignment(.trailing)
+                .environment(\.layoutDirection, .rightToLeft)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+            Text(match.ayah.transliteration)
+                .font(.body.italic())
+                .foregroundStyle(.secondary)
+            Text(match.ayah.translationEn)
+                .font(.body)
+            HStack {
+                Button("Copy", systemImage: "doc.on.doc", action: copyToClipboard)
+                    .buttonStyle(.bordered)
+                ShareLink(item: formattedForCopy) {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
+                .fill(AppDesign.brandGreen.opacity(0.08))
+        )
+        .overlay(alignment: .center) {
+            RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
+                .stroke(AppDesign.brandGreen.opacity(0.6), lineWidth: 1)
+        }
+    }
+
+    private var headerLine: String {
+        let nameLabel: String = {
+            if let s = surahName {
+                return "\(s.transliteration) (\(s.english))"
+            }
+            return "Surah \(match.ayah.surah)"
+        }()
+        return "Surah \(match.ayah.surah) · \(nameLabel) · Ayah \(match.ayah.ayah)"
+    }
+
+    private var formattedForCopy: String {
+        """
+        \(headerLine)
+
+        \(match.ayah.text)
+
+        \(match.ayah.transliteration)
+
+        \(match.ayah.translationEn)
+        """
+    }
+
+    private func copyToClipboard() {
+        UIPasteboard.general.string = formattedForCopy
+    }
+}
+
+private struct QuranMatchHeaderView: View {
+    let match: QuranMatch
+    let surahName: SurahName?
+
+    var body: some View {
+        Label(headerLine, systemImage: "book.closed.fill")
+            .font(.subheadline.bold())
+            .foregroundStyle(AppDesign.brandGreen)
+    }
+
+    private var headerLine: String {
+        let nameLabel: String = {
+            if let s = surahName {
+                return "\(s.transliteration) (\(s.english))"
+            }
+            return "Surah \(match.ayah.surah)"
+        }()
+        return "Surah \(match.ayah.surah) · \(nameLabel) · Ayah \(match.ayah.ayah)"
+    }
+}
+
+#Preview {
+    QuranMatchView(
+        match: QuranMatch(
+            ayah: QuranAyah(
+                surah: 1,
+                ayah: 2,
+                text: "الرَّحْمَٰنِ الرَّحِيمِ",
+                normalized: "الرحمن الرحيم",
+                transliteration: "ar-raḥmāni r-raḥīmi",
+                translationEn: "The Most Compassionate, The Most Merciful"
+            ),
+            score: 1.0,
+            kind: .exact
+        ),
+        surahName: SurahName(
+            number: 1,
+            english: "The Opening",
+            transliteration: "Al-Fatihah",
+            arabic: "الفاتحة"
+        )
+    )
+    .padding()
+}
