@@ -17,6 +17,7 @@ struct TextModeView: View {
     @State private var surahNames: [Int: SurahName] = [:]
     @State private var debounceTask: Task<Void, Never>?
     @State private var translateConfig: TranslationSession.Configuration?
+    @FocusState private var inputFocused: Bool
 
     private let textProcessor = TextProcessor()
 
@@ -42,15 +43,23 @@ struct TextModeView: View {
 
             VStack(alignment: .leading, spacing: AppDesign.sectionSpacing) {
                 arabicInputSection
-                transliterationOutputSection
                 if let match = quranMatch {
                     QuranMatchView(
                         match: match,
                         surahName: surahName(for: match.ayah.surah)
                     )
                     .padding(.horizontal, AppDesign.horizontalPadding)
+                } else {
+                    transliterationOutputSection
                 }
                 translationSection
+            }
+        }
+        .scrollDismissesKeyboard(.interactively)
+        .toolbar {
+            ToolbarItemGroup(placement: .keyboard) {
+                Spacer()
+                Button("Done") { inputFocused = false }
             }
         }
     }
@@ -63,6 +72,7 @@ struct TextModeView: View {
             action: pasteFromClipboard
         ) {
             TextField("Type or paste Arabic", text: $inputText, axis: .vertical)
+                .focused($inputFocused)
                 .font(.title2)
                 .lineLimit(5 ... 10)
                 .padding(8)
