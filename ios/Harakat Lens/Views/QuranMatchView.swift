@@ -11,7 +11,7 @@ struct QuranMatchView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppDesign.stackSpacing) {
-            QuranMatchHeaderView(match: match, surahName: surahName)
+            QuranMatchHeaderView(headerLine: headerLine)
             Text(match.ayah.text)
                 .font(.title2)
                 .multilineTextAlignment(.trailing)
@@ -70,23 +70,12 @@ struct QuranMatchView: View {
 }
 
 private struct QuranMatchHeaderView: View {
-    let match: QuranMatch
-    let surahName: SurahName?
+    let headerLine: String
 
     var body: some View {
         Label(headerLine, systemImage: "book.closed.fill")
-            .font(.subheadline.bold())
+            .font(.subheadline.weight(.semibold))
             .foregroundStyle(AppDesign.brandGreen)
-    }
-
-    private var headerLine: String {
-        let nameLabel: String = {
-            if let s = surahName {
-                return "\(s.transliteration) (\(s.english))"
-            }
-            return "Surah \(match.ayah.surah)"
-        }()
-        return "Surah \(match.ayah.surah) · \(nameLabel) · Ayah \(match.ayah.ayah)"
     }
 }
 
