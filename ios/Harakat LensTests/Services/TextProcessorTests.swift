@@ -52,4 +52,12 @@ struct TextProcessorTests {
         #expect(out != nil)
         #expect(!(out ?? "").isEmpty)
     }
+
+    @Test func processHandlesMultipleArabicSpans() {
+        let out = TextProcessor().process(text: "السلام hello السلام") ?? ""
+        #expect(out.contains(" "))
+        for scalar in out.unicodeScalars {
+            #expect(!(0x0600 ... 0x06FF).contains(scalar.value))
+        }
+    }
 }
