@@ -82,6 +82,12 @@ struct CameraLiveView: View {
             await cameraModel.checkPermissionsAndStart()
             cameraModel.quranModeEnabled = settings.quranMode
         }
+        .onDisappear {
+            cameraModel.quranMatch = nil
+            cameraModel.recognizedTexts = []
+            cameraModel.transliterationMap.removeAll()
+            Task { await cameraModel.stopSession() }
+        }
         .onChange(of: settings.quranMode) { _, newValue in
             cameraModel.quranModeEnabled = newValue
             if !newValue { cameraModel.quranMatch = nil }
