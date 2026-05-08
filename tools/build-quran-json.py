@@ -269,6 +269,21 @@ def transliterate(text: str) -> str:
 # Surah names
 # ---------------------------------------------------------------------------
 
+# U+0633 U+0648 U+0631 U+0629 = سورة (the word "Surah")
+# The AlQuran.cloud API returns names prefixed with "سُورَةُ " (with diacritics)
+_SURAH_PREFIX_RE = re.compile(r"^سُورَةُ\s+")
+
+
+def _strip_surah_prefix(arabic: str) -> str:
+    """Remove leading 'سُورَةُ ' prefix and diacritics from a surah name.
+
+    The AlQuran.cloud API returns e.g. 'سُورَةُ ٱلْفَاتِحَةِ'; we want 'الفاتحة'.
+    Strips the prefix, then removes harakat and alef wasla (U+0671) → bare alef.
+    """
+    arabic = _SURAH_PREFIX_RE.sub("", arabic)
+    return normalize_arabic(arabic)
+
+
 def build_surah_names(raw_data, source_url: str) -> list[dict]:
     """Build surah names list from API response.
 
@@ -283,7 +298,9 @@ def build_surah_names(raw_data, source_url: str) -> list[dict]:
         entries = raw_data["data"]
         for entry in entries:
             number = int(entry.get("number", 0))
-            arabic = str(entry.get("name", ""))
+            arabic_raw = str(entry.get("name", ""))
+            # The API returns "سُورَةُ X" — strip the "سُورَةُ " prefix and diacritics
+            arabic = _strip_surah_prefix(arabic_raw)
             transliteration = str(entry.get("englishName", ""))
             english = str(entry.get("englishNameTranslation", ""))
             surahs.append(
