@@ -5,11 +5,14 @@
 
 import Foundation
 
-struct QuranMatch {
+struct QuranMatch: Identifiable {
     enum Kind { case exact, fuzzy }
     let ayah: QuranAyah
     let score: Double
     let kind: Kind
+    var id: String {
+        ayah.id
+    }
 }
 
 actor QuranMatcher {

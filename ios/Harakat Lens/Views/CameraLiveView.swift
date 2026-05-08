@@ -86,19 +86,14 @@ struct CameraLiveView: View {
             cameraModel.quranModeEnabled = newValue
             if !newValue { cameraModel.quranMatch = nil }
         }
-        .sheet(isPresented: Binding(
-            get: { cameraModel.quranMatch != nil },
-            set: { if !$0 { cameraModel.quranMatch = nil } }
-        )) {
-            if let match = cameraModel.quranMatch {
-                QuranMatchView(
-                    match: match,
-                    surahName: cameraModel.surahName(for: match.ayah.surah)
-                )
-                .padding()
-                .presentationDetents([.medium, .large])
-                .presentationDragIndicator(.visible)
-            }
+        .sheet(item: $cameraModel.quranMatch) { match in
+            QuranMatchView(
+                match: match,
+                surahName: cameraModel.surahName(for: match.ayah.surah)
+            )
+            .padding()
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
         }
     }
 
