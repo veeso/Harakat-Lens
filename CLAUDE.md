@@ -30,7 +30,7 @@ The repository is being migrated from a Chinese-Hanzi-to-Pinyin app (BiangBiang 
 
 MVVM with SwiftUI + Combine. Entry point is `Harakat_LensApp.swift` → `ContentView.swift` (TabView with Text, Camera, Settings tabs).
 
-- **Services/TextProcessor.swift** — text conversion using `CFStringTransform` (currently Hanzi→Pinyin; will move to Arabic-Latin transliteration)
+- **Services/TextProcessor.swift** — text conversion using `CFStringTransform` with ICU `Arabic-Latin`, including `ArabicNormalizer` pre-processing
 - **Services/Camera/CameraModel.swift** — AVFoundation camera + Vision OCR (ObservableObject)
 - **Views/** — SwiftUI views for each tab (TextModeView, CameraModeView, SettingsView)
 - **AppSettings.swift** — User preferences via `UserDefaults` (ObservableObject, injected as `@EnvironmentObject`)
@@ -53,7 +53,7 @@ Uses Google ML Kit Translate for translation. Dependency versions managed in `an
 
 ### Core Algorithm (both platforms)
 
-The TextProcessor currently detects Hanzi characters (Unicode U+4E00–U+9FFF) and converts them to Pinyin with tone marks. The next milestone replaces this pipeline with Arabic script detection (U+0600–U+06FF) + ICU Arabic-Latin transliteration. OCR uses 1-second throttling; text input is debounced at 0.8s.
+The iOS TextProcessor detects Arabic spans (Unicode U+0600–U+06FF), normalizes them via `ArabicNormalizer` (strips harakat, unifies alef/ya), and transliterates to Latin via ICU `kCFStringTransformToLatin`. Quran-aware verse matching runs alongside when Quran mode is enabled. OCR uses 1-second throttling; text input is debounced at 0.8s.
 
 ## Platform Configuration
 
