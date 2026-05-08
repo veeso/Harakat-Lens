@@ -140,14 +140,14 @@ struct TextModeView: View {
 
     private func scheduleDebouncedProcessing() {
         debounceTask?.cancel()
-        debounceTask = Task {
+        debounceTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(800))
             guard !Task.isCancelled else { return }
-            processInput()
+            await processInput()
         }
     }
 
-    private func processInput() {
+    private func processInput() async {
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             transliteratedText = ""
@@ -158,7 +158,7 @@ struct TextModeView: View {
         transliteratedText = textProcessor.process(text: inputText) ?? ""
 
         if settings.quranMode {
-            Task { await runQuranMatch(for: inputText) }
+            await runQuranMatch(for: inputText)
         } else {
             quranMatch = nil
         }

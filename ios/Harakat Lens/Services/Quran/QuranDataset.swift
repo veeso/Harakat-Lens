@@ -19,8 +19,8 @@ actor QuranDataset {
         loaded = true
 
         let bundle = Bundle.main
-        let ayat = Self.decodeArray(QuranAyah.self, named: "quran", in: bundle)
-        let names = Self.decodeArray(SurahName.self, named: "surah-names", in: bundle)
+        let ayat = await Self.decodeArray(QuranAyah.self, named: "quran", in: bundle)
+        let names = await Self.decodeArray(SurahName.self, named: "surah-names", in: bundle)
         all = ayat
         surahNames = Dictionary(uniqueKeysWithValues: names.map { ($0.number, $0) })
 
@@ -38,13 +38,15 @@ actor QuranDataset {
         _: T.Type,
         named: String,
         in bundle: Bundle
-    ) -> [T] {
+    ) async -> [T] {
         guard let url = bundle.url(forResource: named, withExtension: "json") else {
             print("⚠️ QuranDataset: \(named).json missing from bundle")
             return []
         }
         do {
-            let data = try Data(contentsOf: url)
+            let data = try await Task.detached(priority: .utility) {
+                try Data(contentsOf: url)
+            }.value
             return try JSONDecoder().decode([T].self, from: data)
         } catch {
             print("⚠️ QuranDataset: failed to decode \(named).json: \(error)")
