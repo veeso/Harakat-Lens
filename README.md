@@ -1,4 +1,4 @@
-# Harakat Lens — حركات
+# Harakat حركات Lens
 
 ![Logo](./assets/logo128.png)
 
@@ -14,9 +14,8 @@ The app converts Arabic script into readable Latin transliteration and provides 
 - [x] OCR from captured photos and imported images
 - [x] Convert Arabic script to Latin transliteration
 - [x] Translate Arabic text into any selected language
-- [ ] Quran verse recognition with structured metadata (planned)
+- [x] Quran verse recognition with structured metadata (planned)
 - [ ] Audio recitation (planned)
-- [ ] Word-by-word transliteration (planned)
 
 ## Download
 
