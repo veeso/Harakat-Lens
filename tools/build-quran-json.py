@@ -270,18 +270,25 @@ def transliterate(text: str) -> str:
 # ---------------------------------------------------------------------------
 
 # U+0633 U+0648 U+0631 U+0629 = سورة (the word "Surah")
-# The AlQuran.cloud API returns names prefixed with "سُورَةُ " (with diacritics)
-_SURAH_PREFIX_RE = re.compile(r"^سُورَةُ\s+")
+# The AlQuran.cloud API returns names prefixed with "سُورَةُ " (with diacritics).
+# The undiacritized form is also handled in case the API changes.
+_SURAH_PREFIX_RE = re.compile(r"^سُورَةُ?\s+|^سورة\s+")
+
+# Quranic annotation characters U+06D6–U+06ED and superscript hamza U+0653
+# These appear in 44 surah name fields returned by the API and must be stripped.
+_QURANIC_ANNOT_RE = re.compile(r"[ۖ-ۭٓ]")
 
 
 def _strip_surah_prefix(arabic: str) -> str:
-    """Remove leading 'سُورَةُ ' prefix and diacritics from a surah name.
+    """Remove leading 'سُورَةُ ' prefix, diacritics, and Quranic annotation chars.
 
     The AlQuran.cloud API returns e.g. 'سُورَةُ ٱلْفَاتِحَةِ'; we want 'الفاتحة'.
-    Strips the prefix, then removes harakat and alef wasla (U+0671) → bare alef.
+    Strips the prefix, then removes harakat and alef wasla (U+0671) → bare alef,
+    then strips any remaining Quranic annotation marks (U+06D6–U+06ED, U+0653).
     """
     arabic = _SURAH_PREFIX_RE.sub("", arabic)
-    return normalize_arabic(arabic)
+    arabic = normalize_arabic(arabic)
+    return _QURANIC_ANNOT_RE.sub("", arabic).strip()
 
 
 def build_surah_names(raw_data, source_url: str) -> list[dict]:
@@ -435,7 +442,7 @@ def main() -> int:
     quran_entries = []
     for surah, ayah, text in arabic_triples:
         norm = normalize_arabic(text)
-        translit = transliterate(norm)
+        translit = transliterate(text)
         quran_entries.append(
             {
                 "surah": surah,
