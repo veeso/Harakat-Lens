@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct QuranAyah: Decodable, Identifiable, Hashable {
+nonisolated struct QuranAyah: Decodable, Identifiable, Hashable {
     let surah: Int
     let ayah: Int
     let text: String

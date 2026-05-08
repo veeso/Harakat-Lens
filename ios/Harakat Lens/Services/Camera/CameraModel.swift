@@ -416,11 +416,10 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
 
     /// Pick Arabic recognition languages supported by the current Vision revision.
     private static func preferredArabicLanguages() -> [String] {
-        let revision = VNRecognizeTextRequestRevision3
-        let supported = (try? VNRecognizeTextRequest.supportedRecognitionLanguages(
-            for: .accurate,
-            revision: revision
-        )) ?? []
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .accurate
+        request.revision = VNRecognizeTextRequestRevision3
+        let supported = (try? request.supportedRecognitionLanguages()) ?? []
         let arabic = supported.filter { $0.hasPrefix("ar") }
         return arabic.isEmpty ? ["ar-SA", "ar"] : arabic
     }

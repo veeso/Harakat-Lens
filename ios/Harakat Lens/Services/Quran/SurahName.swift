@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct SurahName: Decodable, Identifiable, Hashable {
+nonisolated struct SurahName: Decodable, Identifiable, Hashable {
     let number: Int
     let english: String
     let transliteration: String

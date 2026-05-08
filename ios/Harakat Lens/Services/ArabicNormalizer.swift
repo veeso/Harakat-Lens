@@ -5,7 +5,7 @@
 
 import Foundation
 
-struct ArabicNormalizer {
+nonisolated struct ArabicNormalizer {
     /// When `true`, ta marbuta (ة) is unified to ha (ه) for loose verse matching.
     /// Defaults to `false` to preserve the distinction during transliteration.
     let unifyTaMarbuta: Bool

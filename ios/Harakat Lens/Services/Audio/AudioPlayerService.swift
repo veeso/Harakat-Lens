@@ -52,10 +52,11 @@ final class AudioPlayerService: NSObject {
         player = newPlayer
         state = .loadingAyah(surah: surah, ayah: ayah)
 
-        statusObservation = item.observe(\.status, options: [.new]) { [weak self] observedItem, _ in
-            Task { @MainActor in
+        statusObservation = item.observe(\.status, options: [.new]) { observedItem, _ in
+            let status = observedItem.status
+            Task { @MainActor [weak self] in
                 guard let self else { return }
-                switch observedItem.status {
+                switch status {
                 case .readyToPlay:
                     if case .loadingAyah = self.state {
                         self.state = .playingAyah(surah: surah, ayah: ayah)
@@ -73,8 +74,8 @@ final class AudioPlayerService: NSObject {
             forName: .AVPlayerItemDidPlayToEndTime,
             object: item,
             queue: .main
-        ) { [weak self] _ in
-            Task { @MainActor in
+        ) { _ in
+            Task { @MainActor [weak self] in
                 self?.stop()
             }
         }
