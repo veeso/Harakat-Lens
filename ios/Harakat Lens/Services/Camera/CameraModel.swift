@@ -66,6 +66,11 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
     @ObservationIgnored var previewLayer: AVCaptureVideoPreviewLayer?
     @ObservationIgnored private var lastProcessingTime = Date.distantPast
     @ObservationIgnored private let textProcessor = TextProcessor()
+    /// Monotonic sequence assigned per Vision request. Used to drop
+    /// stale callbacks that land after a newer frame has already been
+    /// dispatched (otherwise old paragraphs flash on screen).
+    @ObservationIgnored private var frameSeq: UInt64 = 0
+    @ObservationIgnored private var latestAppliedSeq: UInt64 = 0
 
     func surahName(for surah: Int) -> SurahName? {
         surahNames[surah]
@@ -98,6 +103,9 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
     ) {
         // do not capture if image is set underneath.
         if capturedImage != nil { return }
+        // freeze OCR while a Quran match is on screen — prevents flicker
+        // from successive imprecise OCR passes overwriting a good match.
+        if quranMatch != nil { return }
 
         let now = Date()
         guard now.timeIntervalSince(lastProcessingTime) > 1 else { return }
@@ -106,7 +114,8 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
         guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
         else { return }
 
-        let request = makeTextRecognitionRequest()
+        frameSeq &+= 1
+        let request = makeTextRecognitionRequest(seq: frameSeq)
         let handler = VNImageRequestHandler(
             cvPixelBuffer: pixelBuffer,
             orientation: .up,
@@ -300,8 +309,11 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
         }
     }
 
-    /// Make the text recognition request for Arabic OCR
-    private func makeTextRecognitionRequest() -> VNRecognizeTextRequest {
+    /// Make the text recognition request for Arabic OCR.
+    /// `seq` tags the request so the @MainActor callback can ignore
+    /// results from frames superseded by newer ones (UInt64.max =
+    /// photo / gallery path that should always apply).
+    private func makeTextRecognitionRequest(seq: UInt64) -> VNRecognizeTextRequest {
         let request = VNRecognizeTextRequest { [weak self] req, _ in
             guard let self,
                   let results = req.results as? [VNRecognizedTextObservation]
@@ -316,22 +328,21 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
             }
 
             Task { @MainActor in
+                // Drop stale frames: a newer frame's results already applied.
+                if seq != .max, seq <= self.latestAppliedSeq { return }
+                // Vision callback may land after a match was locked in;
+                // skip overwriting overlays/match while one is on screen.
+                if self.quranMatch != nil, self.capturedImage == nil { return }
+                if seq != .max { self.latestAppliedSeq = seq }
                 self.recognizedTexts = boxes
                 self.transliterationMap.removeAll(keepingCapacity: true)
-                var topCandidate: String?
-                var topLen = 0
-                let quranEnabled = self.quranModeEnabled
                 for box in boxes {
                     if let translit = self.textProcessor.process(text: box.text) {
                         self.transliterationMap[box.id] = translit
                     }
-                    if quranEnabled, box.text.count > topLen {
-                        topCandidate = box.text
-                        topLen = box.text.count
-                    }
                 }
-                if quranEnabled, let candidate = topCandidate {
-                    await self.runQuranMatch(for: candidate)
+                if self.quranModeEnabled {
+                    await self.runQuranMatchAcrossBoxes(boxes)
                 } else {
                     self.quranMatch = nil
                 }
@@ -354,6 +365,48 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
         quranMatch = await matcher?.match(text)
     }
 
+    /// Run Quran matching against the joined OCR output first
+    /// (verses split across multiple boxes still match), then fall back
+    /// to the longest individual box if the joined attempt misses.
+    @MainActor
+    private func runQuranMatchAcrossBoxes(_ boxes: [RecognizedTextBox]) async {
+        let dataset = QuranDataset.shared
+        if matcher == nil {
+            await dataset.loadIfNeeded()
+            matcher = QuranMatcher(dataset: dataset)
+            surahNames = await dataset.surahNames
+        }
+        guard let matcher else {
+            quranMatch = nil
+            return
+        }
+
+        // Vision boundingBox origin is bottom-left in normalized image coords;
+        // sort top-down by descending maxY so reading order is preserved.
+        let ordered = boxes
+            .sorted { $0.boundingBox.maxY > $1.boundingBox.maxY }
+            .map(\.text)
+        let joined = ordered.joined(separator: " ")
+
+        if !joined.isEmpty, let m = await matcher.match(joined) {
+            quranMatch = m
+            return
+        }
+
+        // Fallback: try each box individually, longest first.
+        let byLength = boxes
+            .map(\.text)
+            .filter { !$0.isEmpty }
+            .sorted { $0.count > $1.count }
+        for text in byLength {
+            if let m = await matcher.match(text) {
+                quranMatch = m
+                return
+            }
+        }
+        quranMatch = nil
+    }
+
     /// Pick Arabic recognition languages supported by the current Vision revision.
     private static func preferredArabicLanguages() -> [String] {
         let revision = VNRecognizeTextRequestRevision3
@@ -368,7 +421,7 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
     /// Recognize the text from an image
     private func recognizeText(from image: UIImage) {
         guard let cgImage = image.cgImage else { return }
-        let request = makeTextRecognitionRequest()
+        let request = makeTextRecognitionRequest(seq: .max)
         let handler = VNImageRequestHandler(
             cgImage: cgImage,
             orientation: cgOrientation(from: image.imageOrientation),
