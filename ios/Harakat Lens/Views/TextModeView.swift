@@ -2,8 +2,6 @@
 //  TextModeView.swift
 //  Harakat Lens
 //
-//  Created by christian visintin on 02/11/25.
-//
 
 import SwiftUI
 import Translation
@@ -12,7 +10,7 @@ struct TextModeView: View {
     @Environment(AppSettings.self) private var settings
 
     @State private var inputText: String = ""
-    @State private var pinyinText: String = ""
+    @State private var transliteratedText: String = ""
     @State private var translatedText: String = ""
     @State private var debounceTask: Task<Void, Never>?
     @State private var translateConfig: TranslationSession.Configuration?
@@ -35,29 +33,31 @@ struct TextModeView: View {
             .frame(maxWidth: .infinity)
             .padding(.top, 16)
 
-            Text("Convert Hanzi to Pinyin")
+            Text("Transliterate Arabic")
                 .font(.title2)
                 .padding(.vertical, 4)
 
             VStack(alignment: .leading, spacing: AppDesign.sectionSpacing) {
-                hanziInputSection
-                pinyinOutputSection
+                arabicInputSection
+                transliterationOutputSection
                 translationSection
             }
         }
     }
 
-    private var hanziInputSection: some View {
+    private var arabicInputSection: some View {
         SectionView(
-            title: "Hanzi",
+            title: "Arabic",
             actionLabel: "Paste",
             actionIcon: "doc.on.clipboard",
             action: pasteFromClipboard
         ) {
-            TextField("Type or paste Hanzi", text: $inputText, axis: .vertical)
+            TextField("Type or paste Arabic", text: $inputText, axis: .vertical)
                 .font(.title2)
                 .lineLimit(5 ... 10)
                 .padding(8)
+                .multilineTextAlignment(.trailing)
+                .environment(\.layoutDirection, .rightToLeft)
                 .overlay {
                     RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
                         .stroke(.secondary)
@@ -69,14 +69,14 @@ struct TextModeView: View {
         .padding(.horizontal, AppDesign.horizontalPadding)
     }
 
-    private var pinyinOutputSection: some View {
+    private var transliterationOutputSection: some View {
         SectionView(
-            title: "Pinyin",
+            title: "Transliteration",
             actionLabel: "Copy",
             actionIcon: "doc.on.doc",
-            action: { copyToClipboard(pinyinText) }
+            action: { copyToClipboard(transliteratedText) }
         ) {
-            ReadOnlyTextBox(text: pinyinText, font: .title3)
+            ReadOnlyTextBox(text: transliteratedText, font: .title3)
         }
         .padding(.horizontal, AppDesign.horizontalPadding)
     }
@@ -101,7 +101,7 @@ struct TextModeView: View {
                     .translationTask(translateConfig) { session in
                         await runTranslation(using: session)
                     }
-                    .accessibilityHint("Translate the Hanzi text to your selected language")
+                    .accessibilityHint("Translate the Arabic text to your selected language")
             }
         }
         .padding(.horizontal, AppDesign.horizontalPadding)
@@ -114,7 +114,7 @@ struct TextModeView: View {
         }
 
         translateConfig = .init(
-            source: .init(identifier: settings.chineseVariant),
+            source: .init(identifier: "ar"),
             target: .init(identifier: settings.userLanguage)
         )
     }
@@ -140,11 +140,11 @@ struct TextModeView: View {
     private func processInput() {
         let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            pinyinText = ""
+            transliteratedText = ""
             translatedText = ""
             return
         }
-        pinyinText = textProcessor.process(text: inputText) ?? ""
+        transliteratedText = textProcessor.process(text: inputText) ?? ""
     }
 
     private func pasteFromClipboard() {
