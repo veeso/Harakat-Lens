@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "dev.veeso.biangbianghanzi"
+    namespace = "dev.veeso.harakatlens"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "dev.veeso.biangbianghanzi"
+        applicationId = "dev.veeso.harakatlens"
         minSdk = 26
         targetSdk = 36
         versionCode = 31

@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BiangBiang Hanzi"
+rootProject.name = "Harakat Lens"
 include(":app")
