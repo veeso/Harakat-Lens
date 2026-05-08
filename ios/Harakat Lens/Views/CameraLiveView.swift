@@ -10,6 +10,7 @@ import SwiftUI
 
 struct CameraLiveView: View {
     @Bindable var cameraModel: CameraModel
+    @Environment(AppSettings.self) private var settings
     @State private var selectedItem: PhotosPickerItem?
     @State private var pinchBaseZoom: CGFloat = 1.0
 
@@ -79,6 +80,25 @@ struct CameraLiveView: View {
         )
         .task {
             await cameraModel.checkPermissionsAndStart()
+            cameraModel.quranModeEnabled = settings.quranMode
+        }
+        .onChange(of: settings.quranMode) { _, newValue in
+            cameraModel.quranModeEnabled = newValue
+            if !newValue { cameraModel.quranMatch = nil }
+        }
+        .sheet(isPresented: Binding(
+            get: { cameraModel.quranMatch != nil },
+            set: { if !$0 { cameraModel.quranMatch = nil } }
+        )) {
+            if let match = cameraModel.quranMatch {
+                QuranMatchView(
+                    match: match,
+                    surahName: cameraModel.surahName(for: match.ayah.surah)
+                )
+                .padding()
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+            }
         }
     }
 
