@@ -11,6 +11,12 @@ import SwiftUI
 struct Harakat_LensApp: App {
     @State private var settings = AppSettings()
 
+    init() {
+        Task.detached(priority: .utility) {
+            await QuranDataset.shared.loadIfNeeded()
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
