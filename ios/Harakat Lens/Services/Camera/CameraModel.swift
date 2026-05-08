@@ -25,14 +25,14 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
 {
     /// Recognised text by camera
     var recognizedTexts: [RecognizedTextBox] = []
-    /// Map between the recognised text id and the pinyin for it
-    var pinyinMap: [UUID: String] = [:]
+    /// Map between recognised text id and its Latin transliteration.
+    var transliterationMap: [UUID: String] = [:]
     /// If the user captured an image, it will be saved here
     var capturedImage: UIImage?
     /// No camera permission
     var missingCameraPermission: Bool = false
-    /// Whether to show pinyin instead of Hanzi in overlays
-    var showPinyin: Bool = true
+    /// Whether to show transliteration instead of Arabic in overlays
+    var showTransliteration: Bool = true
     /// Show copied toast
     var showCopiedToast: Bool = false
 
@@ -287,7 +287,7 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
         }
     }
 
-    /// Make the text recognition request for OCR
+    /// Make the text recognition request for Arabic OCR
     private func makeTextRecognitionRequest() -> VNRecognizeTextRequest {
         let request = VNRecognizeTextRequest { [weak self] req, _ in
             guard let self,
@@ -304,18 +304,29 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
 
             Task { @MainActor in
                 self.recognizedTexts = boxes
-                self.pinyinMap.removeAll(keepingCapacity: true)
+                self.transliterationMap.removeAll(keepingCapacity: true)
                 for box in boxes {
-                    if let pinyin = self.textProcessor.process(text: box.text) {
-                        self.pinyinMap[box.id] = pinyin
+                    if let translit = self.textProcessor.process(text: box.text) {
+                        self.transliterationMap[box.id] = translit
                     }
                 }
             }
         }
-        request.recognitionLanguages = ["zh-Hans", "zh-Hant"]
+        request.recognitionLanguages = Self.preferredArabicLanguages()
         request.recognitionLevel = .accurate
 
         return request
+    }
+
+    /// Pick Arabic recognition languages supported by the current Vision revision.
+    private static func preferredArabicLanguages() -> [String] {
+        let revision = VNRecognizeTextRequestRevision3
+        let supported = (try? VNRecognizeTextRequest.supportedRecognitionLanguages(
+            for: .accurate,
+            revision: revision
+        )) ?? []
+        let arabic = supported.filter { $0.hasPrefix("ar") }
+        return arabic.isEmpty ? ["ar-SA", "ar"] : arabic
     }
 
     /// Recognize the text from an image
