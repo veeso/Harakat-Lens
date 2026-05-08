@@ -19,5 +19,8 @@ Pods/
 .claude/
 !.claude/skills/
 
+# Python virtualenvs
+.venv*/
+
 docs/superpowers/
 
