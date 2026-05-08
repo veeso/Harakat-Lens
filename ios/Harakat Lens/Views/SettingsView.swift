@@ -2,8 +2,6 @@
 //  SettingsView.swift
 //  Harakat Lens
 //
-//  Created by christian visintin on 02/11/25.
-//
 
 import SwiftUI
 
@@ -37,13 +35,13 @@ struct SettingsView: View {
                 }
 
                 Section {
-                    Picker("Variant", selection: $settings.chineseVariant) {
-                        Text("Simplified").tag("zh-Hans")
-                        Text("Traditional").tag("zh-Hant")
-                    }
-                    .pickerStyle(.segmented)
+                    Toggle("Quran mode", isOn: $settings.quranMode)
                 } header: {
-                    Label("Chinese variant", systemImage: "textformat")
+                    Label("Quran mode", systemImage: "book.closed")
+                } footer: {
+                    Text(
+                        "When on, recognized Arabic is matched against the Quran and shown with surah and ayah info."
+                    )
                 }
 
                 Section {
@@ -59,6 +57,16 @@ struct SettingsView: View {
                     )
                 } header: {
                     Label("Report a bug", systemImage: "ladybug")
+                }
+
+                Section {
+                    Text(
+                        "Quran text: Tanzil Project (Uthmani). English translation: Sahih International."
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                } header: {
+                    Label("Attributions", systemImage: "info.circle")
                 }
             }
             .navigationTitle("Settings")
