@@ -1,30 +1,29 @@
-# 𰻝𰻝汉子 BiangBiang Hanzi
+# Harakat Lens — حركات
 
 ![Logo](./assets/logo128.png)
 
 ## Overview
 
-𰻝𰻝汉子 BiangBiang Hanzi is an iOS and Android application that allows users to convert Hanzi (Chinese characters) to Pinyin and translate Chinese text into any language. It supports both traditional and simplified Chinese characters and includes OCR capabilities for recognizing text from images, either live or from the camera.
+Harakat Lens is an iOS and Android application that allows users to scan, transliterate, and translate Arabic text instantly using OCR. It targets Arabic learners, travelers, beginners approaching Arabic script, Quran readers, and anyone who cannot yet read Arabic fluently.
 
-This app has been developed using Swift and SwiftUI, leveraging the power of Apple's Vision framework for OCR functionality.
-
-I developed this app to help myself and others learn Chinese more effectively by providing an easy way to read and understand Hanzi characters. It happened many times when I was in China in restaurants for example, I could not read the menu because I did not know how to pronounce the characters; but if I could know the pinyin I would have been able to read it out loud and order food. This app aims to solve that problem as well, aside from being a useful tool for learning Chinese in general.
+The app converts Arabic script into readable Latin transliteration and provides translation, with optional Quran-aware features. It supports both generic Arabic text and Quranic Arabic.
 
 ## Features
 
-- [x] Convert Hanzi to Pinyin
-- [x] Translate Chinese to any language
-- [x] Support for traditional and simplified Chinese characters
-- [x] OCR support for images (both live and from camera)
-- [x] OCR support from files
-- [ ] Cantonese support (coming soon)
+- [x] Scan Arabic text via live camera OCR
+- [x] OCR from captured photos and imported images
+- [x] Convert Arabic script to Latin transliteration
+- [x] Translate Arabic text into any selected language
+- [ ] Quran verse recognition with structured metadata (planned)
+- [ ] Audio recitation (planned)
+- [ ] Word-by-word transliteration (planned)
 
 ## Download
 
-You can purchase 𰻝𰻝汉子 BiangBiang Hanzi from the App Store and from the Google Play Store (coming soon).
+Coming soon to the App Store and Google Play.
 
-[![App Store](./assets/app_store_badge.png)](https://apps.apple.com/app/id6754869174)
-[![Google Play](./assets/google_play_badge.png)](https://play.google.com/store/apps/details?id=dev.veeso.biangbianghanzi)
+![App Store](./assets/app_store_badge.png)
+![Google Play](./assets/google_play_badge.png)
 
 ## Required Tools
 
@@ -50,14 +49,14 @@ This project is licensed under the Elastic V2 license. See the [LICENSE](./LICEN
 
 ## Gallery
 
-Convert Hanzi to Pinyin and translate.
+Convert Arabic to Latin transliteration and translate.
 
 ![Preview](./assets/preview.png)
 
-Recognize hanzi from live images and convert to Pinyin.
+Recognize Arabic from live camera and convert to transliteration.
 
 ![Camera OCR](./assets/camera_ocr.png)
 
-Configure whether to use traditional or simplified Chinese characters.
+Configure preferences.
 
 ![Settings](./assets/settings.png)

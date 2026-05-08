@@ -12,7 +12,9 @@ module.exports = {
     },
     extend: {
       colors: {
-        brand: "#DE2910",
+        brand: "#006C35",
+        "brand-light": "#00994C",
+        "brand-dark": "#004C26",
       },
       fontSize: {
         xl: "1.5rem",
