@@ -36,6 +36,15 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
     /// Show copied toast
     var showCopiedToast: Bool = false
 
+    /// Best Quran verse match for the latest OCR pass, if any.
+    var quranMatch: QuranMatch?
+    /// Whether Quran-mode-driven matching is enabled (driven by AppSettings).
+    var quranModeEnabled: Bool = false
+    /// Surah names cache for display.
+    @ObservationIgnored private var surahNames: [Int: SurahName] = [:]
+    /// Cached matcher instance; built lazily after dataset load.
+    @ObservationIgnored private var matcher: QuranMatcher?
+
     /// Currently active capture device. Used for zoom configuration.
     @ObservationIgnored private var device: AVCaptureDevice?
     /// UI-facing zoom factor (1.0 == standard wide lens).
@@ -57,6 +66,10 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
     @ObservationIgnored var previewLayer: AVCaptureVideoPreviewLayer?
     @ObservationIgnored private var lastProcessingTime = Date.distantPast
     @ObservationIgnored private let textProcessor = TextProcessor()
+
+    func surahName(for surah: Int) -> SurahName? {
+        surahNames[surah]
+    }
 
     /// Capture a photo and start task to recognize text
     func capturePhoto() {
@@ -305,10 +318,22 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
             Task { @MainActor in
                 self.recognizedTexts = boxes
                 self.transliterationMap.removeAll(keepingCapacity: true)
+                var topCandidate: String?
+                var topLen = 0
+                let quranEnabled = self.quranModeEnabled
                 for box in boxes {
                     if let translit = self.textProcessor.process(text: box.text) {
                         self.transliterationMap[box.id] = translit
                     }
+                    if quranEnabled, box.text.count > topLen {
+                        topCandidate = box.text
+                        topLen = box.text.count
+                    }
+                }
+                if quranEnabled, let candidate = topCandidate {
+                    await self.runQuranMatch(for: candidate)
+                } else {
+                    self.quranMatch = nil
                 }
             }
         }
@@ -316,6 +341,17 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
         request.recognitionLevel = .accurate
 
         return request
+    }
+
+    @MainActor
+    private func runQuranMatch(for text: String) async {
+        let dataset = QuranDataset.shared
+        if matcher == nil {
+            await dataset.loadIfNeeded()
+            matcher = QuranMatcher(dataset: dataset)
+            surahNames = await dataset.surahNames
+        }
+        quranMatch = await matcher?.match(text)
     }
 
     /// Pick Arabic recognition languages supported by the current Vision revision.
