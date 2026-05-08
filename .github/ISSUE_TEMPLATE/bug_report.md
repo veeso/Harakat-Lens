@@ -15,7 +15,4 @@ assignees: veeso
 
 ## Additional information
 
----
-
-Issues without the `android` or `iOS` labels will be closed. Please provide the app os with the label
 
