@@ -10,6 +10,7 @@ import SwiftUI
 @main
 struct Harakat_LensApp: App {
     @State private var settings = AppSettings()
+    @State private var audio = AudioPlayerService()
 
     init() {
         Task.detached(priority: .utility) {
@@ -21,6 +22,7 @@ struct Harakat_LensApp: App {
         WindowGroup {
             ContentView()
                 .environment(settings)
+                .environment(audio)
         }
     }
 }

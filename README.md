@@ -15,7 +15,8 @@ The app converts Arabic script into readable Latin transliteration and provides 
 - [x] Convert Arabic script to Latin transliteration
 - [x] Translate Arabic text into any selected language
 - [x] Quran verse recognition with structured metadata (planned)
-- [ ] Audio recitation (planned)
+- [x] Audio recitation for matched Quran ayahs (iOS, streamed from EveryAyah.com)
+- [x] Text-to-speech playback for arbitrary Arabic input (iOS)
 
 ## Download
 

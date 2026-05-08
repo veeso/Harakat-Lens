@@ -9,6 +9,8 @@ struct QuranMatchView: View {
     let match: QuranMatch
     let surahName: SurahName?
 
+    @Environment(AudioPlayerService.self) private var audio
+
     var body: some View {
         VStack(alignment: .leading, spacing: AppDesign.stackSpacing) {
             QuranMatchHeaderView(headerLine: headerLine)
@@ -23,6 +25,7 @@ struct QuranMatchView: View {
             Text(match.ayah.translationEn)
                 .font(.body)
             HStack {
+                listenButton
                 Button("Copy", systemImage: "doc.on.doc", action: copyToClipboard)
                     .buttonStyle(.bordered)
                 ShareLink(item: formattedForCopy) {
@@ -67,6 +70,34 @@ struct QuranMatchView: View {
     private func copyToClipboard() {
         UIPasteboard.general.string = formattedForCopy
     }
+
+    @ViewBuilder
+    private var listenButton: some View {
+        let surah = match.ayah.surah
+        let ayah = match.ayah.ayah
+        let isLoading = audio.isLoadingAyah(surah: surah, ayah: ayah)
+        let isPlaying = audio.isPlayingAyah(surah: surah, ayah: ayah)
+        Button {
+            if isPlaying || isLoading {
+                audio.stop()
+            } else {
+                audio.playAyah(surah: surah, ayah: ayah)
+            }
+        } label: {
+            if isLoading {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text("Loading")
+                }
+            } else if isPlaying {
+                Label("Stop", systemImage: "stop.circle.fill")
+            } else {
+                Label("Listen", systemImage: "play.circle.fill")
+            }
+        }
+        .buttonStyle(.bordered)
+        .accessibilityHint("Stream the recitation of this ayah")
+    }
 }
 
 private struct QuranMatchHeaderView: View {
@@ -101,4 +132,5 @@ private struct QuranMatchHeaderView: View {
         )
     )
     .padding()
+    .environment(AudioPlayerService())
 }

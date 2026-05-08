@@ -8,6 +8,7 @@ import Translation
 
 struct TextModeView: View {
     @Environment(AppSettings.self) private var settings
+    @Environment(AudioPlayerService.self) private var audio
 
     @State private var inputText: String = ""
     @State private var transliteratedText: String = ""
@@ -71,22 +72,46 @@ struct TextModeView: View {
             actionIcon: "doc.on.clipboard",
             action: pasteFromClipboard
         ) {
-            TextField("Type or paste Arabic", text: $inputText, axis: .vertical)
-                .focused($inputFocused)
-                .font(.title2)
-                .lineLimit(5 ... 10)
-                .padding(8)
-                .multilineTextAlignment(.trailing)
-                .environment(\.layoutDirection, .rightToLeft)
-                .overlay {
-                    RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
-                        .stroke(.secondary)
-                }
-                .onChange(of: inputText) { _, _ in
-                    scheduleDebouncedProcessing()
-                }
+            VStack(alignment: .trailing, spacing: 8) {
+                TextField("Type or paste Arabic", text: $inputText, axis: .vertical)
+                    .focused($inputFocused)
+                    .font(.title2)
+                    .lineLimit(5 ... 10)
+                    .padding(8)
+                    .multilineTextAlignment(.trailing)
+                    .environment(\.layoutDirection, .rightToLeft)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
+                            .stroke(.secondary)
+                    }
+                    .onChange(of: inputText) { _, _ in
+                        scheduleDebouncedProcessing()
+                    }
+                ttsButton
+            }
         }
         .padding(.horizontal, AppDesign.horizontalPadding)
+    }
+
+    private var ttsButton: some View {
+        let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let isPlaying = audio.isSpeakingTTS
+        return Button {
+            if isPlaying {
+                audio.stop()
+            } else {
+                audio.speakArabic(inputText)
+            }
+        } label: {
+            Label(
+                isPlaying ? "Stop" : "Listen",
+                systemImage: isPlaying ? "stop.circle.fill" : "speaker.wave.2.fill"
+            )
+        }
+        .buttonStyle(.bordered)
+        .buttonBorderShape(.capsule)
+        .disabled(trimmed.isEmpty && !isPlaying)
+        .accessibilityHint("Read the Arabic text aloud")
     }
 
     private var transliterationOutputSection: some View {
@@ -220,5 +245,7 @@ private struct ReadOnlyTextBox: View {
 }
 
 #Preview {
-    TextModeView().environment(AppSettings())
+    TextModeView()
+        .environment(AppSettings())
+        .environment(AudioPlayerService())
 }
