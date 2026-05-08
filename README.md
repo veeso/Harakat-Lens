@@ -42,6 +42,14 @@ swiftformat ./ios
 
 Run `swiftformat ./ios` whenever iOS code is modified.
 
+## Website
+
+Build the website CSS (Tailwind CSS v3) after changing any content under `site/`:
+
+```bash
+npx tailwindcss -i ./site/input.css -o ./site/output.css --minify
+```
+
 ## License
 
 This project is licensed under the Elastic V2 license. See the [LICENSE](./LICENSE) file for details.

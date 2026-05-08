@@ -24,6 +24,10 @@ The repository is being migrated from a Chinese-Hanzi-to-Pinyin app (BiangBiang 
 - **Run a single test class:** `cd android && ./gradlew test --tests "dev.veeso.harakatlens.TextProcessorTest"`
 - **Run instrumented tests:** `cd android && ./gradlew connectedAndroidTest`
 
+### Website (Tailwind CSS v3)
+
+- **Build CSS:** `npx tailwindcss -i ./site/input.css -o ./site/output.css --minify`. **Run this whenever website content under `site/` is modified.**
+
 ## Architecture
 
 ### iOS (`ios/Harakat Lens/`)
