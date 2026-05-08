@@ -15,7 +15,7 @@ struct ArabicNormalizerTests {
         #expect(ArabicNormalizer().normalize("أإآٱ") == "اااا")
     }
 
-    @Test func unifiesYaAndAlefMaqsura() {
+    @Test func unifiesAlefMaqsuraToYa() {
         #expect(ArabicNormalizer().normalize("على") == "علي")
     }
 
