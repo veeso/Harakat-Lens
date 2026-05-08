@@ -25,6 +25,8 @@ class TextProcessor {
         let range = NSRange(text.startIndex..., in: text)
 
         var result = text
+        // Iterate in reverse so earlier match offsets stay valid in `result`
+        // even when a replacement changes the string length.
         let matches = regex.matches(in: text, range: range).reversed()
         for match in matches {
             guard let r = Range(match.range, in: result) else { continue }
