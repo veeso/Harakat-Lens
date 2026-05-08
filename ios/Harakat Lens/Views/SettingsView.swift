@@ -40,7 +40,7 @@ struct SettingsView: View {
                     Label("Quran mode", systemImage: "book.closed")
                 } footer: {
                     Text(
-                        "When on, recognized Arabic is matched against the Quran and shown with surah and ayah info."
+                        "Identifies Quran verses in scanned or typed Arabic and shows the surah name, ayah number, and translation."
                     )
                 }
 
