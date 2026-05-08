@@ -2,102 +2,77 @@
 //  TextProcessor.swift
 //  Harakat Lens
 //
-//  Created by christian visintin on 03/01/26.
-//
 
 import Foundation
 
 class TextProcessor {
-    let regex: NSRegularExpression
+    private let regex: NSRegularExpression
+    private let normalizer = ArabicNormalizer()
 
     init() {
-        // Unicode range for CJK Unified Ideographs: U+4E00–U+9FFF
-        // Extended ranges (A, B, C, D...) can be added if needed.
-        let pattern = "[\\u4E00-\\u9FFF]+"
+        // Arabic block: U+0600–U+06FF
+        let pattern = "[\\u0600-\\u06FF]+"
         regex = try! NSRegularExpression(pattern: pattern, options: [])
     }
 
-    /// Process given text applying the following operations:
-    ///
-    /// 1. if the text does not contain ANY hanzi: discard it and return.
-    /// 2. Take all the hanzi characters and convert to pinyin
-    /// 3. add leading space to pinyin, otherwise latin characters are sticked to the other
-    /// 4. trim
+    /// Process given text:
+    /// 1. If no Arabic characters present → return nil.
+    /// 2. Replace each Arabic span with its Latin transliteration.
+    /// 3. Pad with spaces around adjacent Latin letters/digits.
+    /// 4. Collapse whitespace and trim.
     func process(text: String) -> String? {
-        guard containsHanzi(text: text) else { return nil }
+        guard containsArabic(text: text) else { return nil }
         let range = NSRange(text.startIndex..., in: text)
 
         var result = text
-
-        // We iterate matches in reverse order to avoid messing up ranges
         let matches = regex.matches(in: text, range: range).reversed()
         for match in matches {
-            guard let range = Range(match.range, in: result) else {
-                continue
-            }
+            guard let r = Range(match.range, in: result) else { continue }
+            let arabic = String(result[r])
+            let latin = arabicToLatin(arabic)
 
-            let hanzi = String(result[range])
-            let pinyin = hanziToPinyin(hanzi: hanzi)
-
-            // Space before
-            let needsLeadingSpace: Bool = {
-                if range.lowerBound == result.startIndex {
-                    return false
-                }
-
-                let prevChar = result[result.index(before: range.lowerBound)]
-                return prevChar != " " && !".,!?;:".contains(prevChar)
+            let needsLeading: Bool = {
+                if r.lowerBound == result.startIndex { return false }
+                let prev = result[result.index(before: r.lowerBound)]
+                return prev != " " && !".,!?;:".contains(prev)
             }()
 
-            // Space after
-            let needsTrailingSpace: Bool = {
-                guard range.upperBound < result.endIndex else {
-                    return false
-                }
-
-                let nextChar = result[range.upperBound]
-                return nextChar.isASCII && (nextChar.isLetter || nextChar.isNumber)
+            let needsTrailing: Bool = {
+                guard r.upperBound < result.endIndex else { return false }
+                let next = result[r.upperBound]
+                return next.isASCII && (next.isLetter || next.isNumber)
             }()
 
             let replacement =
-                (needsLeadingSpace ? " " : "") +
-                pinyin +
-                (needsTrailingSpace ? " " : "")
+                (needsLeading ? " " : "") + latin + (needsTrailing ? " " : "")
 
-            result.replaceSubrange(range, with: replacement)
+            result.replaceSubrange(r, with: replacement)
         }
 
-        // Cleanup
         result = result.replacingOccurrences(
             of: "\\s+([.,!?;:])",
             with: "$1",
             options: .regularExpression
         )
-
         result = result.replacingOccurrences(
             of: "\\s{2,}",
             with: " ",
             options: .regularExpression
         )
-
         return result.trimmingCharacters(in: .whitespaces)
     }
 
-    /// Given a `text` tells whether the text contains hanzi
-    func containsHanzi(text: String) -> Bool {
+    func containsArabic(text: String) -> Bool {
         let range = NSRange(text.startIndex..., in: text)
         return regex.firstMatch(in: text, range: range) != nil
     }
 
-    /// Takes a hanzi string and converts it to Pinyin notation.
-    ///
-    /// Example:
-    ///
-    /// “你好” -》 “nǐhǎo“
-    /// ”我喜欢饺子🥟“ -〉 ”wǒ xǐhuān jiǎozǐ 🥟“
-    func hanziToPinyin(hanzi: String) -> String {
-        let mutString = NSMutableString(string: hanzi) as CFMutableString
-        CFStringTransform(mutString, nil, kCFStringTransformToLatin, false)
-        return mutString as String
+    /// Arabic → Latin via ICU (`kCFStringTransformToLatin`).
+    /// Normalizes diacritics first so output is stable across input variants.
+    func arabicToLatin(_ arabic: String) -> String {
+        let normalized = normalizer.normalize(arabic)
+        let mut = NSMutableString(string: normalized) as CFMutableString
+        CFStringTransform(mut, nil, kCFStringTransformToLatin, false)
+        return mut as String
     }
 }
