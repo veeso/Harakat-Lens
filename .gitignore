@@ -17,6 +17,7 @@ Pods/
 
 # Claude
 .claude/
+!.claude/skills/
 
 docs/superpowers/
 
