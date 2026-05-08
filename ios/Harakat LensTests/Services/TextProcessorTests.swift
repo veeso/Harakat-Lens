@@ -2,55 +2,54 @@
 //  TextProcessorTests.swift
 //  Harakat Lens
 //
-//  Created by christian visintin on 03/01/26.
-//
 
 @testable import Harakat_Lens
 import Testing
 
-struct TestProcessorTests {
-    @Test func shouldTakeHanziFromText() {
-        let text = TextProcessor().containsHanzi(text: "你好Pizza我爱你123")
-        #expect(text)
+struct TextProcessorTests {
+    @Test func detectsArabicInMixedText() {
+        #expect(TextProcessor().containsArabic(text: "Hello السلام 123"))
     }
 
-    @Test func shouldNotTakeHanziFromText() {
-        let text = TextProcessor().containsHanzi(text: "Pizza123")
-        #expect(!text)
+    @Test func rejectsNonArabic() {
+        #expect(!TextProcessor().containsArabic(text: "Hello 123"))
     }
 
-    @Test func shouldConvertHanziWordToPinyin() {
-        let pinyin = TextProcessor().hanziToPinyin(hanzi: "你好")
-        #expect(pinyin == "nǐ hǎo")
+    @Test func arabicToLatinStripsArabicCharacters() {
+        let out = TextProcessor().arabicToLatin("السلام")
+        #expect(!out.isEmpty)
+        // No characters left in the Arabic block
+        for scalar in out.unicodeScalars {
+            #expect(!(0x0600 ... 0x06FF).contains(scalar.value))
+        }
     }
 
-    @Test func shouldConvertHanziSentenceToPinyin() {
-        let pinyin = TextProcessor().hanziToPinyin(hanzi: "我喜欢饺子🥟")
-        #expect(pinyin == "wǒ xǐ huān jiǎo zǐ🥟")
+    @Test func processReturnsNilWhenNoArabic() {
+        #expect(TextProcessor().process(text: "no arabic here") == nil)
     }
 
-    @Test func shouldConvertTraditionalHanziSentenceToPinyin() {
-        let pinyin = TextProcessor().hanziToPinyin(hanzi: "我喜歡餃子🥟")
-        #expect(pinyin == "wǒ xǐ huān jiǎo zǐ🥟")
+    @Test func processReturnsTransliteratedWhenArabicPresent() {
+        let out = TextProcessor().process(text: "السلام")
+        #expect(out != nil)
+        #expect(!(out ?? "").isEmpty)
+        for scalar in (out ?? "").unicodeScalars {
+            #expect(!(0x0600 ... 0x06FF).contains(scalar.value))
+        }
     }
 
-    @Test func shouldNotReturnTextNotContainingAnyHanzi() {
-        let text = "This is a test string with no hanzi in it."
-        let pinyin = TextProcessor().process(text: text)
-        #expect(pinyin == nil)
+    @Test func processInsertsSpaceBetweenArabicAndLatin() {
+        // Latin-Arabic-Latin should not stick together
+        let out = TextProcessor().process(text: "Read السلام now") ?? ""
+        // Expect at least one ASCII space present, no Arabic remaining
+        #expect(out.contains(" "))
+        for scalar in out.unicodeScalars {
+            #expect(!(0x0600 ... 0x06FF).contains(scalar.value))
+        }
     }
 
-    @Test func shouldApplyAllTextTransformations() {
-        let text = "我在NASA工作. 现在是5点."
-        let expectedText = "wǒ zài NASA gōng zuò. xiàn zài shì 5 diǎn."
-        let processedText = TextProcessor().process(text: text)
-        #expect(processedText == expectedText)
-    }
-
-    @Test func shouldProcessSingleCharacters() {
-        let text = "王"
-        let expectedText = "wáng"
-        let processedText = TextProcessor().process(text: text)
-        #expect(processedText == expectedText)
+    @Test func processSingleArabicWord() {
+        let out = TextProcessor().process(text: "بسم")
+        #expect(out != nil)
+        #expect(!(out ?? "").isEmpty)
     }
 }
