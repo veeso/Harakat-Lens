@@ -7,8 +7,7 @@
   </title>
   <meta property="og:description"
     content="Harakat Lens - Instantly read and transliterate Arabic text with built-in OCR" />
-  <meta name="description"
-    content="Harakat Lens - Instantly read and transliterate Arabic text with built-in OCR" />
+  <meta name="description" content="Harakat Lens - Instantly read and transliterate Arabic text with built-in OCR" />
   <meta property="og:title" content="Harakat Lens - Read and transliterate Arabic instantly" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -38,7 +37,8 @@
         <img src="assets/images/logo.png" alt="Harakat Lens Logo" class="w-64 h-64 sm:w-32 sm:h-32 mx-auto mb-4" />
       </div>
       <h1 class="text-3xl font-bold text-center text-white mb-2">Harakat حركات Lens</h1>
-      <p class="text-center text-white text-xl mb-6 px-4">Instantly read and transliterate Arabic text with built-in OCR</p>
+      <p class="text-center text-white text-xl mb-6 px-4">Instantly read and transliterate Arabic text with built-in OCR
+      </p>
     </div>
 
     <!-- Download buttons -->
@@ -100,7 +100,7 @@
       </div>
       <div class="flex flex-col items-center">
         <div>
-          <span class="text-white text-xs">Copyright © 2026 Christian Visintin</span>
+          <span class="text-white text-xs">Copyright © <span id="copyright-year">2026</span> Christian Visintin</span>
         </div>
         <div>
           <span class="text-white text-xs">Google Play and the Google Play logo are trademarks of Google LLC.</span>
@@ -108,6 +108,10 @@
       </div>
     </div>
   </footer>
+  <script type="text/javascript">
+    // Set current year in copyright
+    document.getElementById('copyright-year').textContent = new Date().getFullYear();
+  </script>
 </body>
 
 </html>
