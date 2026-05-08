@@ -15,7 +15,7 @@ struct CameraPermissionView: View {
         ContentUnavailableView {
             Label("Camera access disabled", systemImage: "camera.slash")
         } description: {
-            Text("Enable camera permissions in Settings to scan Hanzi from the live feed.")
+            Text("Enable camera permissions in Settings to scan Arabic text from the live feed.")
         } actions: {
             Button("Open Settings", action: openSystemSettings)
                 .buttonStyle(.borderedProminent)
