@@ -2,8 +2,6 @@
 //  AppSettings.swift
 //  Harakat Lens
 //
-//  Created by christian visintin on 02/11/25.
-//
 
 import Foundation
 import Observation
@@ -12,24 +10,23 @@ import Observation
 @Observable
 final class AppSettings {
     var userLanguage: String {
-        didSet {
-            UserDefaults.standard.set(userLanguage, forKey: "user_language")
-        }
+        didSet { userDefaults.set(userLanguage, forKey: "user_language") }
     }
 
-    var chineseVariant: String {
-        didSet { UserDefaults.standard.set(chineseVariant, forKey: "chinese") }
+    var quranMode: Bool {
+        didSet { userDefaults.set(quranMode, forKey: "quran_mode") }
     }
+
+    @ObservationIgnored private let userDefaults: UserDefaults
 
     init(
         userDefaults: UserDefaults = .standard,
         defaultLanguage: String = Locale.current.language.languageCode?
-            .identifier ?? "en",
-        defaultChineseVariant: String = "zh-Hans"
+            .identifier ?? "en"
     ) {
+        self.userDefaults = userDefaults
         userLanguage =
             userDefaults.string(forKey: "user_language") ?? defaultLanguage
-        chineseVariant =
-            userDefaults.string(forKey: "chinese") ?? defaultChineseVariant
+        quranMode = userDefaults.bool(forKey: "quran_mode")
     }
 }
