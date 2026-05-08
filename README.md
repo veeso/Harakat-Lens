@@ -50,12 +50,8 @@ This project is licensed under the Elastic V2 license. See the [LICENSE](./LICEN
 
 Convert Arabic to Latin transliteration and translate.
 
-![Preview](./assets/preview.png)
+![Preview](./assets/preview.webp)
 
 Recognize Arabic from live camera and convert to transliteration.
 
-![Camera OCR](./assets/camera_ocr.png)
-
-Configure preferences.
-
-![Settings](./assets/settings.png)
+![Camera OCR](./assets/camera_ocr.webp)
