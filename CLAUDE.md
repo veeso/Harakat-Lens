@@ -14,7 +14,7 @@ The repository is being migrated from a Chinese-Hanzi-to-Pinyin app (BiangBiang 
 
 - **Open project:** `open "ios/Harakat Lens.xcodeproj"`
 - **Build:** Xcode ⌘B or `xcodebuild -project "ios/Harakat Lens.xcodeproj" -scheme "Harakat Lens" build`
-- **Run tests:** `xcodebuild test -project "ios/Harakat Lens.xcodeproj" -scheme "Harakat Lens" -destination 'platform=iOS Simulator,name=iPhone 16'`
+- **Run tests:** `xcodebuild test -project "ios/Harakat Lens.xcodeproj" -scheme "Harakat Lens" -destination 'platform=iOS Simulator,name=iPhone 17'`
 - **Format code:** `swiftformat ./ios` (requires `brew install swiftformat`). **Run this whenever iOS code is modified.**
 
 ### Android (Kotlin + Jetpack Compose)
