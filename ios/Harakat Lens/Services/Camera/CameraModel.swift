@@ -71,6 +71,7 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
     /// dispatched (otherwise old paragraphs flash on screen).
     @ObservationIgnored private var frameSeq: UInt64 = 0
     @ObservationIgnored private var latestAppliedSeq: UInt64 = 0
+    @ObservationIgnored private var isConfigured = false
 
     func surahName(for surah: Int) -> SurahName? {
         surahNames[surah]
@@ -185,12 +186,18 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
     }
 
     private func configureAndStartSession() async {
-        // Configure on main actor
-        configureSession()
+        // Configure once. Re-running configureSession across tab switches
+        // re-locks the device and re-attaches inputs while the previous
+        // configuration is still partially live, which leaves the camera in
+        // a broken state on the second return to the camera tab.
+        if !isConfigured {
+            configureSession()
+            isConfigured = true
+        }
         // Start running on a background thread
         await startCaptureSession()
         // Re-apply initial zoom: addInput resets videoZoomFactor on some devices.
-        setZoom(1.0)
+        setZoom(zoomFactor)
     }
 
     private func configureSession() {
