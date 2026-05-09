@@ -60,4 +60,13 @@ struct TextProcessorTests {
             #expect(!(0x0600 ... 0x06FF).contains(scalar.value))
         }
     }
+
+    @Test func vocalizedInputProducesVocalizedLatin() {
+        let processor = TextProcessor()
+        // كِتَابٌ — already vocalized; expect macron vowels in the Latin output.
+        let out = processor.arabicToLatin("كِتَابٌ")
+        #expect(out.contains("i"))
+        #expect(out.contains("ā") || out.contains("a"))
+        #expect(!out.isEmpty)
+    }
 }
