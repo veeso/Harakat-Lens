@@ -17,7 +17,7 @@ struct QuranMatch: Identifiable {
 
 actor QuranMatcher {
     private let dataset: QuranDataset
-    private let normalizer = ArabicNormalizer()
+    private let normalizer = ArabicNormalizer(mode: .matching)
     private let minTokenLength = 2
     private let candidateCap = 600
     private let rareTokenLimit = 5
