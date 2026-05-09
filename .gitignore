@@ -28,3 +28,6 @@ docs/superpowers/
 tools/dict-builder/.cache/
 tools/dict-builder/__pycache__/
 tools/dict-builder/tests/__pycache__/
+
+# Generated vocab dictionary (rebuild via tools/dict-builder)
+ios/Harakat Lens/Resources/vocab.plist
