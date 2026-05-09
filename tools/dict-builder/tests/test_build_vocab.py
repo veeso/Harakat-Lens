@@ -67,3 +67,43 @@ def test_aggregate_vocab_falls_back_to_bare_when_no_vocalization():
     # All occurrences are bare — no vocalized variant means no useful entry.
     result = aggregate_vocab(tokens)
     assert "كتب" not in result
+
+
+import plistlib
+import tempfile
+
+from build_vocab import build_from_corpus, write_plist
+
+
+def test_build_from_corpus_respects_top_n(tmp_path: Path):
+    corpus = tmp_path / "c.txt"
+    corpus.write_text(
+        "كِتَاب " * 10
+        + "كِتَاب " * 10
+        + "مَدْرَسَة " * 5
+        + "بَيْت " * 1
+    )
+    result = build_from_corpus([corpus], top_n=2)
+    # كتاب (20) and مدرسة (5) win; بيت (1) is cut.
+    assert set(result.keys()) == {"كتاب", "مدرسة"}
+
+
+def test_write_plist_round_trip(tmp_path: Path):
+    out = tmp_path / "vocab.plist"
+    write_plist({"كتاب": "كِتَاب", "الله": "اللَّه"}, out)
+    with out.open("rb") as f:
+        loaded = plistlib.load(f)
+    assert loaded == {"كتاب": "كِتَاب", "الله": "اللَّه"}
+    # Verify binary format (FMT_BINARY starts with bplist00).
+    assert out.read_bytes()[:8] == b"bplist00"
+
+
+def test_build_end_to_end_on_fixture(tmp_path: Path):
+    fixture = Path(__file__).parent / "fixtures" / "sample_corpus.txt"
+    out = tmp_path / "vocab.plist"
+    result = build_from_corpus([fixture], top_n=10)
+    write_plist(result, out)
+    with out.open("rb") as f:
+        loaded = plistlib.load(f)
+    assert "كتاب" in loaded
+    assert loaded["كتاب"] == "كِتَاب"

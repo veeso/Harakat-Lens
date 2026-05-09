@@ -84,3 +84,74 @@ def aggregate_vocab(tokens: list[str]) -> dict[str, str]:
         winner = max(vocalized.items(), key=lambda kv: (kv[1], kv[0]))[0]
         result[bare] = winner
     return result
+
+
+def build_from_corpus(paths: list[Path], top_n: int) -> dict[str, str]:
+    """Read every file in `paths`, tokenize, aggregate, return top-N entries.
+
+    Top-N is by total bare-form frequency (sum across all vocalizations).
+    """
+    raw_tokens: list[str] = []
+    bare_freq: Counter[str] = Counter()
+    for path in paths:
+        text = Path(path).read_text(encoding="utf-8")
+        for token in tokenize(text):
+            if not is_acceptable_token(token):
+                continue
+            raw_tokens.append(token)
+            bare_freq[strip_harakat(token)] += 1
+
+    full = aggregate_vocab(raw_tokens)
+    if top_n <= 0 or top_n >= len(full):
+        return full
+    keep = {bare for bare, _ in bare_freq.most_common(top_n)}
+    return {bare: voc for bare, voc in full.items() if bare in keep}
+
+
+def write_plist(mapping: dict[str, str], path: Path) -> None:
+    """Write `mapping` as a binary plist at `path`."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("wb") as f:
+        plistlib.dump(mapping, f, fmt=plistlib.FMT_BINARY)
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "corpus",
+        nargs="+",
+        type=Path,
+        help="One or more Tashkeela corpus files (or directories of .txt).",
+    )
+    parser.add_argument(
+        "--top-n",
+        type=int,
+        default=40000,
+        help="Keep only the top-N bare forms by frequency. 0 = keep all.",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("ios/Harakat Lens/Resources/vocab.plist"),
+        help="Output plist path (relative to repo root).",
+    )
+    args = parser.parse_args(argv)
+
+    paths: list[Path] = []
+    for entry in args.corpus:
+        if entry.is_dir():
+            paths.extend(sorted(entry.rglob("*.txt")))
+        else:
+            paths.append(entry)
+    if not paths:
+        print("error: no corpus files found", file=sys.stderr)
+        return 1
+
+    mapping = build_from_corpus(paths, top_n=args.top_n)
+    write_plist(mapping, args.output)
+    print(f"wrote {len(mapping)} entries to {args.output}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
