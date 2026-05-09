@@ -24,3 +24,7 @@ Pods/
 
 docs/superpowers/
 
+# dict-builder
+tools/dict-builder/.cache/
+tools/dict-builder/__pycache__/
+tools/dict-builder/tests/__pycache__/
