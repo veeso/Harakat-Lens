@@ -7,7 +7,7 @@ import Foundation
 
 class TextProcessor {
     private let regex: NSRegularExpression
-    private let normalizer = ArabicNormalizer()
+    private let normalizer = ArabicNormalizer(mode: .transliteration)
 
     init() {
         // Arabic block: U+0600–U+06FF
