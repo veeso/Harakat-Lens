@@ -37,3 +37,50 @@ def tokenize(text: str) -> list[str]:
             if piece:
                 out.append(piece)
     return out
+
+
+_ARABIC_LETTER_RE = re.compile("[ء-غف-يٮ-ۓە-ۿ]")
+_ARABIC_DIGIT_RE = re.compile("[٠-٩۰-۹]")
+
+
+def is_acceptable_token(token: str) -> bool:
+    """True if `token` is a usable Arabic word for the dictionary."""
+    if not token:
+        return False
+    bare = strip_harakat(token)
+    if len(bare) < 2:
+        return False
+    # Reject tokens that contain anything outside the Arabic letter set
+    # (ASCII letters, Latin digits, punctuation).
+    for ch in bare:
+        if not _ARABIC_LETTER_RE.match(ch):
+            return False
+    # Reject pure Arabic-Indic digit strings (already excluded by the letter
+    # check, but keep this explicit for clarity if the letter set widens).
+    if all(_ARABIC_DIGIT_RE.match(ch) for ch in bare):
+        return False
+    return True
+
+
+def aggregate_vocab(tokens: list[str]) -> dict[str, str]:
+    """Group tokens by bare form, pick highest-frequency vocalized variant.
+
+    Skips bare forms that have no vocalized variant in the corpus — bare-only
+    entries provide no information that ICU could not derive on its own.
+    """
+    by_bare: dict[str, Counter[str]] = defaultdict(Counter)
+    for token in tokens:
+        if not is_acceptable_token(token):
+            continue
+        bare = strip_harakat(token)
+        by_bare[bare][token] += 1
+
+    result: dict[str, str] = {}
+    for bare, variants in by_bare.items():
+        # Variants that differ from the bare form are the vocalized ones.
+        vocalized = {tok: count for tok, count in variants.items() if tok != bare}
+        if not vocalized:
+            continue
+        winner = max(vocalized.items(), key=lambda kv: (kv[1], kv[0]))[0]
+        result[bare] = winner
+    return result
