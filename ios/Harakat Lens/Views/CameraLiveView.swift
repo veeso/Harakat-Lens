@@ -92,6 +92,13 @@ struct CameraLiveView: View {
             cameraModel.quranModeEnabled = newValue
             if !newValue { cameraModel.quranMatch = nil }
         }
+        .onChange(of: cameraModel.quranMatch) { oldValue, newValue in
+            // User-driven dismissal of the sheet sets quranMatch to nil; record
+            // it so the same verse stays suppressed for a short cooldown.
+            if let old = oldValue, newValue == nil {
+                cameraModel.noteDismissedMatch(old)
+            }
+        }
         .sheet(item: $cameraModel.quranMatch) { match in
             QuranMatchView(
                 match: match,
