@@ -8,8 +8,10 @@ import Foundation
 class TextProcessor {
     private let regex: NSRegularExpression
     private let normalizer = ArabicNormalizer(mode: .transliteration)
+    private let vocalizer: Vocalizer
 
-    init() {
+    init(vocalizer: Vocalizer = Vocalizer()) {
+        self.vocalizer = vocalizer
         // Arabic block: U+0600–U+06FF
         let pattern = "[\\u0600-\\u06FF]+"
         regex = try! NSRegularExpression(pattern: pattern, options: [])
@@ -70,9 +72,13 @@ class TextProcessor {
     }
 
     /// Arabic → Latin via ICU (`kCFStringTransformToLatin`).
-    /// Normalizes diacritics first so output is stable across input variants.
+    /// Vocalizes bare words via the dictionary first; preserves any
+    /// caller-supplied harakat. Drops tatweel before handing to ICU.
     func arabicToLatin(_ arabic: String) -> String {
-        let normalized = normalizer.normalize(arabic)
+        // The matching regex captures contiguous Arabic-block runs only, so
+        // `arabic` is already a single word in the typical call path.
+        let vocalized = vocalizer.vocalize(arabic)
+        let normalized = normalizer.normalize(vocalized)
         let mut = NSMutableString(string: normalized) as CFMutableString
         CFStringTransform(mut, nil, kCFStringTransformToLatin, false)
         return mut as String
