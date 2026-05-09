@@ -44,6 +44,21 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
     @ObservationIgnored private var surahNames: [Int: SurahName] = [:]
     /// Cached matcher instance; built lazily after dataset load.
     @ObservationIgnored private var matcher: QuranMatcher?
+    /// Last user-dismissed match id; suppress its respawn until cooldown elapses.
+    @ObservationIgnored private var dismissedMatchId: String?
+    @ObservationIgnored private var dismissedUntil: Date = .distantPast
+    private static let dismissCooldown: TimeInterval = 5
+
+    /// Mark `match` as dismissed by the user. The same match is suppressed
+    /// from re-appearing until `dismissCooldown` seconds elapse.
+    func noteDismissedMatch(_ match: QuranMatch) {
+        dismissedMatchId = match.id
+        dismissedUntil = Date().addingTimeInterval(Self.dismissCooldown)
+    }
+
+    private func isSuppressed(_ match: QuranMatch) -> Bool {
+        dismissedMatchId == match.id && Date() < dismissedUntil
+    }
 
     /// Currently active capture device. Used for zoom configuration.
     @ObservationIgnored private var device: AVCaptureDevice?
@@ -369,7 +384,11 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
             matcher = QuranMatcher(dataset: dataset)
             surahNames = await dataset.surahNames
         }
-        quranMatch = await matcher?.match(text)
+        if let m = await matcher?.match(text), !isSuppressed(m) {
+            quranMatch = m
+        } else {
+            quranMatch = nil
+        }
     }
 
     /// Run Quran matching against the joined OCR output first
@@ -395,7 +414,7 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
             .map(\.text)
         let joined = ordered.joined(separator: " ")
 
-        if !joined.isEmpty, let m = await matcher.match(joined) {
+        if !joined.isEmpty, let m = await matcher.match(joined), !isSuppressed(m) {
             quranMatch = m
             return
         }
@@ -406,7 +425,7 @@ final class CameraModel: NSObject, AVCapturePhotoCaptureDelegate,
             .filter { !$0.isEmpty }
             .sorted { $0.count > $1.count }
         for text in byLength {
-            if let m = await matcher.match(text) {
+            if let m = await matcher.match(text), !isSuppressed(m) {
                 quranMatch = m
                 return
             }

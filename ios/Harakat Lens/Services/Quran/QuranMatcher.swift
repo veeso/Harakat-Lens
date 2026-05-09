@@ -5,7 +5,7 @@
 
 import Foundation
 
-struct QuranMatch: Identifiable {
+struct QuranMatch: Identifiable, Equatable {
     enum Kind { case exact, fuzzy }
     let ayah: QuranAyah
     let score: Double
