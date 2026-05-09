@@ -29,7 +29,7 @@ struct RecognizedTextOverlay: View {
         let textToDisplay = cameraModel.showTransliteration ? transliteration : arabic
         let scaleRatio =
             cameraModel.showTransliteration
-                ? CGFloat(arabic.count) / CGFloat(max(transliteration.count, 1)) : 1.0
+                ? CGFloat(arabic.count) / CGFloat(max(transliteration.count * 2, 1)) : 1.0
         let scaleFactor = min(max(scaleRatio, 0.5), 1.0)
         let fontSize = max(Self.minFontSize, frame.height * scaleFactor)
 
