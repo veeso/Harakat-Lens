@@ -140,7 +140,7 @@ def main(argv: list[str] | None = None) -> int:
     paths: list[Path] = []
     for entry in args.corpus:
         if entry.is_dir():
-            paths.extend(sorted(entry.rglob("*.txt")))
+            paths.extend(sorted(p for p in entry.rglob("*.txt") if p.is_file()))
         else:
             paths.append(entry)
     if not paths:
