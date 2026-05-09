@@ -19,7 +19,7 @@ The repository was migrated from a Chinese-Hanzi-to-Pinyin app (BiangBiang Hanzi
 
 ### Website (Tailwind CSS v3)
 
-- **Build CSS:** `npx tailwindcss -i ./site/input.css -o ./site/output.css --minify`. **Run this whenever website content under `site/` is modified.**
+- **Build CSS:** `npx tailwindcss@3 -i ./site/input.css -o ./site/output.css --minify`. **Run this whenever website content under `site/` is modified.**
 
 ## Architecture
 
