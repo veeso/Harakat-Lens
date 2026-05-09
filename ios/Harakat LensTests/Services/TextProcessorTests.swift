@@ -69,4 +69,29 @@ struct TextProcessorTests {
         #expect(out.contains("ā") || out.contains("a"))
         #expect(!out.isEmpty)
     }
+
+    @Test func unvocalizedKnownWordGetsVowels() {
+        let processor = TextProcessor()
+        // Bare كتاب — dictionary should vocalize to كِتَاب → ICU produces "kitāb"-ish.
+        let out = processor.arabicToLatin("كتاب")
+        #expect(out.lowercased().contains("kit"))
+    }
+
+    @Test func unknownWordFallsBackToBareTransliteration() {
+        let processor = TextProcessor()
+        // A nonsense Arabic-letter sequence not in the dictionary — should
+        // return *something* (consonant-only ICU output) without crashing.
+        let out = processor.arabicToLatin("ززززز")
+        #expect(!out.isEmpty)
+    }
+
+    @Test func processSentenceMixesKnownAndUnknown() {
+        let processor = TextProcessor()
+        // الله (known) + ززززز (unknown) — first word vocalized, second bare.
+        let out = processor.process(text: "الله ززززز") ?? ""
+        // Vocalized الله produces a word with double-l (lām+lām via shadda).
+        // Bare ززززز transliterates to a z-run.
+        #expect(out.contains("ll"))
+        #expect(out.lowercased().contains("z"))
+    }
 }
