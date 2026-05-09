@@ -50,4 +50,31 @@ struct ArabicNormalizerTests {
     @Test func emptyStringReturnsEmpty() {
         #expect(ArabicNormalizer().normalize("") == "")
     }
+
+    // MARK: - Transliteration mode
+
+    @Test func transliterationPreservesHarakat() {
+        let n = ArabicNormalizer(mode: .transliteration)
+        #expect(n.normalize("كِتَابٌ") == "كِتَابٌ")
+    }
+
+    @Test func transliterationPreservesAlefVariants() {
+        let n = ArabicNormalizer(mode: .transliteration)
+        #expect(n.normalize("أإآٱ") == "أإآٱ")
+    }
+
+    @Test func transliterationStripsTatweelOnly() {
+        let n = ArabicNormalizer(mode: .transliteration)
+        #expect(n.normalize("اـلسـلام") == "السلام")
+    }
+
+    @Test func transliterationPreservesAlefMaqsura() {
+        let n = ArabicNormalizer(mode: .transliteration)
+        #expect(n.normalize("على") == "على")
+    }
+
+    @Test func matchingModeIsDefault() {
+        // Existing default-init behavior must not change.
+        #expect(ArabicNormalizer().normalize("الرَّحْمَٰنِ") == "الرحمن")
+    }
 }
