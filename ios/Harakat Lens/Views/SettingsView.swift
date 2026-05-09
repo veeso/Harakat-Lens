@@ -65,6 +65,11 @@ struct SettingsView: View {
                     )
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                    Text(
+                        "Vocalized Arabic dictionary derived from the Tashkeela corpus (Taha Zerrouki et al., GPL)."
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
                 } header: {
                     Label("Attributions", systemImage: "info.circle")
                 }
