@@ -20,9 +20,9 @@ The app converts Arabic script into readable Latin transliteration and provides 
 
 ## Download
 
-Coming soon to the App Store.
+Now available on the App Store:
 
-![App Store](./assets/app_store_badge.png)
+[![App Store](./assets/app_store_badge.png)](https://apps.apple.com/app/id6767614189)
 
 ## Required Tools
 
