@@ -21,6 +21,8 @@ The repository is being migrated from a Chinese-Hanzi-to-Pinyin app (BiangBiang 
 
 ### Android (Kotlin + Jetpack Compose)
 
+- **JDK (macOS):** Gradle requires a JDK. No system JDK is installed; use the one bundled with Android Studio: `export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"` and prepend `$JAVA_HOME/bin` to `PATH` before invoking `./gradlew`.
+- **Android SDK (macOS):** create `android/local.properties` with `sdk.dir=/Users/veeso/Library/Android/sdk` (file is gitignored).
 - **Build debug:** `cd android && ./gradlew assembleDebug`
 - **Run unit tests:** `cd android && ./gradlew test`
 - **Run a single test class:** `cd android && ./gradlew test --tests "dev.veeso.harakatlens.TextProcessorTest"`
