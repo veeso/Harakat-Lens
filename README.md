@@ -4,7 +4,7 @@
 
 ## Overview
 
-Harakat Lens is an iOS application that allows users to scan, transliterate, and translate Arabic text instantly using OCR. It targets Arabic learners, travelers, beginners approaching Arabic script, Quran readers, and anyone who cannot yet read Arabic fluently.
+Harakat Lens is an iOS and Android application that allows users to scan, transliterate, and translate Arabic text instantly using OCR. It targets Arabic learners, travelers, beginners approaching Arabic script, Quran readers, and anyone who cannot yet read Arabic fluently.
 
 The app converts Arabic script into readable Latin transliteration and provides translation, with optional Quran-aware features. It supports both generic Arabic text and Quranic Arabic.
 
@@ -15,14 +15,15 @@ The app converts Arabic script into readable Latin transliteration and provides 
 - [x] Convert Arabic script to Latin transliteration
 - [x] Translate Arabic text into any selected language
 - [x] Quran verse recognition with structured metadata (planned)
-- [x] Audio recitation for matched Quran ayahs (streamed from EveryAyah.com)
-- [x] Text-to-speech playback for arbitrary Arabic input
+- [x] Audio recitation for matched Quran ayahs (iOS, streamed from EveryAyah.com)
+- [x] Text-to-speech playback for arbitrary Arabic input (iOS)
 
 ## Download
 
-Now available on the App Store:
+Now available on the App Store and Google Play:
 
 [![App Store](./assets/app_store_badge.png)](https://apps.apple.com/app/id6767614189)
+![Google Play](./assets/google_play_badge.png)
 
 ## Required Tools
 
