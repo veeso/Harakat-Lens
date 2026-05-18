@@ -1,15 +1,22 @@
 //
-//  AudioPlayerService.swift
+//  EveryAyahAudioProvider.swift
 //  Harakat Lens
+//
+//  The EveryAyah-streaming part of the former `AudioPlayerService`, ported
+//  into a library `AudioProvider`. Streams
+//  `https://everyayah.com/data/Alafasy_128kbps/SSSAAA.mp3` for an ayah and
+//  falls back to system TTS for arbitrary text. AVPlayer / synthesizer
+//  plumbing and the KVO/notification observers are ported verbatim.
 //
 
 import AVFoundation
+import BiangBiangUI
 import Foundation
 import Observation
 
 @MainActor
 @Observable
-final class AudioPlayerService: NSObject {
+final class EveryAyahAudioProvider: NSObject, AudioProvider, AVSpeechSynthesizerDelegate {
     enum State: Equatable {
         case idle
         case loadingAyah(surah: Int, ayah: Int)
@@ -20,9 +27,9 @@ final class AudioPlayerService: NSObject {
     private(set) var state: State = .idle
 
     private let synthesizer = AVSpeechSynthesizer()
-    private var player: AVPlayer?
-    private var endObserver: NSObjectProtocol?
-    private var statusObservation: NSKeyValueObservation?
+    @ObservationIgnored private var player: AVPlayer?
+    @ObservationIgnored private var endObserver: NSObjectProtocol?
+    @ObservationIgnored private var statusObservation: NSKeyValueObservation?
 
     private let reciter = "Alafasy_128kbps"
 
@@ -31,17 +38,41 @@ final class AudioPlayerService: NSObject {
         synthesizer.delegate = self
     }
 
-    func speakArabic(_ text: String) {
+    // MARK: - AudioProvider
+
+    /// Library entry point. When `text` parses as `"surah:ayah"` (the form
+    /// `QuranAyah.id` produces) the recitation is streamed from EveryAyah;
+    /// otherwise the text is spoken with the system synthesizer in the given
+    /// language (falling back to Arabic).
+    func play(text: String, languageCode: String?) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        if let ref = Self.parseAyahReference(trimmed) {
+            playAyah(surah: ref.surah, ayah: ref.ayah)
+        } else {
+            speak(trimmed, languageCode: languageCode ?? "ar")
+        }
+    }
+
+    var isPlaying: Bool {
+        state != .idle
+    }
+
+    // MARK: - System TTS fallback
+
+    func speak(_ text: String, languageCode: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         stop()
         configureSession()
         let utterance = AVSpeechUtterance(string: trimmed)
-        utterance.voice = AVSpeechSynthesisVoice(language: "ar")
+        utterance.voice = AVSpeechSynthesisVoice(language: languageCode)
         utterance.rate = AVSpeechUtteranceDefaultSpeechRate
         state = .speakingTTS
         synthesizer.speak(utterance)
     }
+
+    // MARK: - EveryAyah streaming (ported from AudioPlayerService)
 
     func playAyah(surah: Int, ayah: Int) {
         stop()
@@ -112,10 +143,7 @@ final class AudioPlayerService: NSObject {
         return false
     }
 
-    var isSpeakingTTS: Bool {
-        if case .speakingTTS = state { return true }
-        return false
-    }
+    // MARK: - Helpers
 
     private func configureSession() {
         #if os(iOS)
@@ -130,16 +158,29 @@ final class AudioPlayerService: NSObject {
         let a = String(format: "%03d", ayah)
         return URL(string: "https://everyayah.com/data/\(reciter)/\(s)\(a).mp3")
     }
-}
 
-extension AudioPlayerService: AVSpeechSynthesizerDelegate {
-    nonisolated func speechSynthesizer(_: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance) {
+    private static func parseAyahReference(_ text: String) -> (surah: Int, ayah: Int)? {
+        let parts = text.split(separator: ":")
+        guard parts.count == 2,
+              let surah = Int(parts[0].trimmingCharacters(in: .whitespaces)),
+              let ayah = Int(parts[1].trimmingCharacters(in: .whitespaces))
+        else { return nil }
+        return (surah, ayah)
+    }
+
+    // MARK: - AVSpeechSynthesizerDelegate
+
+    nonisolated func speechSynthesizer(
+        _: AVSpeechSynthesizer, didFinish _: AVSpeechUtterance
+    ) {
         Task { @MainActor in
             if case .speakingTTS = state { state = .idle }
         }
     }
 
-    nonisolated func speechSynthesizer(_: AVSpeechSynthesizer, didCancel _: AVSpeechUtterance) {
+    nonisolated func speechSynthesizer(
+        _: AVSpeechSynthesizer, didCancel _: AVSpeechUtterance
+    ) {
         Task { @MainActor in
             if case .speakingTTS = state { state = .idle }
         }

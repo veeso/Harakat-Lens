@@ -2,18 +2,45 @@
 //  QuranMatchView.swift
 //  Harakat Lens
 //
+//  Adapted for the library plugin slot: the audio service is injected as an
+//  `EveryAyahAudioProvider` reference (instead of `@Environment` from the
+//  app), and the brand-green colour is a local constant (the library's
+//  `AppDesign` doesn't vend it). Layout and behaviour are unchanged.
+//
 
+import BiangBiangUI
 import SwiftUI
 
 struct QuranMatchView: View {
     let match: QuranMatch
     let surahName: SurahName?
+    @Bindable var audio: EveryAyahAudioProvider
+    /// Shows the ✕ button. Only the inline (text) card needs it; the camera
+    /// half-sheet is dismissed by swiping down, so the ✕ would be redundant.
+    var showsDismissButton: Bool
+    /// User dismissal. The plugin clears the sticky match and starts the
+    /// respawn cooldown so the same verse does not immediately reappear.
+    var onDismiss: () -> Void
 
-    @Environment(AudioPlayerService.self) private var audio
+    private let brandGreen = Color(red: 0x00 / 255.0, green: 0x6C / 255.0, blue: 0x35 / 255.0)
 
     var body: some View {
         VStack(alignment: .leading, spacing: AppDesign.stackSpacing) {
-            QuranMatchHeaderView(headerLine: headerLine)
+            HStack(alignment: .firstTextBaseline) {
+                QuranMatchHeaderView(headerLine: headerLine, brandGreen: brandGreen)
+                if showsDismissButton {
+                    Spacer()
+                    Button {
+                        audio.stop()
+                        onDismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Dismiss Quran match")
+                }
+            }
             Text(match.ayah.text)
                 .font(.title2)
                 .multilineTextAlignment(.trailing)
@@ -37,11 +64,11 @@ struct QuranMatchView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
-                .fill(AppDesign.brandGreen.opacity(0.08))
+                .fill(brandGreen.opacity(0.08))
         )
         .overlay(alignment: .center) {
             RoundedRectangle(cornerRadius: AppDesign.cornerRadius)
-                .stroke(AppDesign.brandGreen.opacity(0.6), lineWidth: 1)
+                .stroke(brandGreen.opacity(0.6), lineWidth: 1)
         }
     }
 
@@ -102,35 +129,11 @@ struct QuranMatchView: View {
 
 private struct QuranMatchHeaderView: View {
     let headerLine: String
+    let brandGreen: Color
 
     var body: some View {
         Label(headerLine, systemImage: "book.closed.fill")
             .font(.subheadline.weight(.semibold))
-            .foregroundStyle(AppDesign.brandGreen)
+            .foregroundStyle(brandGreen)
     }
-}
-
-#Preview {
-    QuranMatchView(
-        match: QuranMatch(
-            ayah: QuranAyah(
-                surah: 1,
-                ayah: 2,
-                text: "الرَّحْمَٰنِ الرَّحِيمِ",
-                normalized: "الرحمن الرحيم",
-                transliteration: "ar-raḥmāni r-raḥīmi",
-                translationEn: "The Most Compassionate, The Most Merciful"
-            ),
-            score: 1.0,
-            kind: .exact
-        ),
-        surahName: SurahName(
-            number: 1,
-            english: "The Opening",
-            transliteration: "Al-Fatihah",
-            arabic: "الفاتحة"
-        )
-    )
-    .padding()
-    .environment(AudioPlayerService())
 }
