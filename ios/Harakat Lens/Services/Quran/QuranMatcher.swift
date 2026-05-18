@@ -17,27 +17,41 @@ struct QuranMatch: Identifiable, Equatable {
 
 actor QuranMatcher {
     private let dataset: QuranDataset
-    private let normalizer = ArabicNormalizer(mode: .matching)
-    private let minTokenLength = 2
-    private let candidateCap = 600
-    private let rareTokenLimit = 5
-    private let scoreThreshold = 0.74
-    private let strongTokenLength = 4
-    private let minFitLength = 8
 
     init(dataset: QuranDataset) {
         self.dataset = dataset
     }
 
+    /// Async convenience: load the dataset snapshot, then run the pure
+    /// synchronous matcher. Logic lives entirely in `bestMatch`.
     func match(_ rawArabic: String) async -> QuranMatch? {
+        let all = await dataset.all
+        let tokenIndex = await dataset.tokenIndex
+        return Self.bestMatch(rawArabic, all: all, tokenIndex: tokenIndex)
+    }
+
+    /// Pure, synchronous best-match over an already-loaded snapshot. The
+    /// algorithm is unchanged — only relocated here so a caller holding a
+    /// preloaded snapshot (the Quran plugin) can match without `await`.
+    nonisolated static func bestMatch(
+        _ rawArabic: String,
+        all: [QuranAyah],
+        tokenIndex: [String: [Int]]
+    ) -> QuranMatch? {
+        let normalizer = ArabicNormalizer(mode: .matching)
+        let minTokenLength = 2
+        let candidateCap = 600
+        let rareTokenLimit = 5
+        let scoreThreshold = 0.74
+        let strongTokenLength = 4
+        let minFitLength = 8
+
         let norm = normalizer.normalize(rawArabic)
         let tokens = norm.split(separator: " ").filter { $0.count >= minTokenLength }
         guard !tokens.isEmpty else { return nil }
         let hasStrongToken = tokens.contains { $0.count >= strongTokenLength }
         guard tokens.count >= 2 || hasStrongToken else { return nil }
 
-        let all = await dataset.all
-        let tokenIndex = await dataset.tokenIndex
         guard !all.isEmpty else { return nil }
 
         // 1. Exact containment pass (bidirectional) — dataset is already in surah/ayah order.
