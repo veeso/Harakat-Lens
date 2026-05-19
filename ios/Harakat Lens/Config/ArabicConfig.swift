@@ -8,8 +8,8 @@
 //  every screen from this data.
 //
 
-import BiangBiangUI
 internal import CoreFoundation
+import BiangBiangUI
 
 enum ArabicConfig {
     @MainActor
@@ -56,6 +56,6 @@ enum ArabicConfig {
             "outputTitle": "Transliteration",
             "appSubtitle": "Transliterate Arabic",
         ],
-        minimumOcrScaleFactor: 0.5,
+        minimumOcrScaleFactor: 0.5
     )
 }

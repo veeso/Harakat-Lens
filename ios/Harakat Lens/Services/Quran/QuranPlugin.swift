@@ -55,8 +55,41 @@ final class QuranPlugin: FeaturePlugin {
     /// (and thus re-present) the sheet on every OCR tick.
     private var presentedMatchId: String?
 
+    /// Single in-flight matching job. `bestMatch` is O(dataset) and must
+    /// never run on the main actor (it froze the camera/UI). At most one
+    /// runs at a time; the library keeps ticking, so a skipped tick is
+    /// retried with newer text on the next call.
+    private var matchTask: Task<Void, Never>?
+
+    /// The last text handed to a match job. The camera yields near-identical
+    /// normalized text every frame; re-scanning the same text is the work
+    /// that starved the OCR pipeline, so identical input is skipped.
+    private var lastScheduledQuery: String?
+
     init() {
         preloadSnapshot()
+    }
+
+    /// Injects a preloaded snapshot (callers that already hold one / tests).
+    init(
+        ayat: [QuranAyah],
+        tokenIndex: [String: [Int]],
+        surahNames: [Int: SurahName]
+    ) {
+        self.ayat = ayat
+        self.tokenIndex = tokenIndex
+        self.surahNames = surahNames
+        snapshotLoaded = !ayat.isEmpty
+    }
+
+    /// The match currently held by the observed model, if any.
+    var currentMatch: QuranMatch? {
+        model.match
+    }
+
+    /// Whether a background match job is currently in flight.
+    var isMatching: Bool {
+        matchTask != nil
     }
 
     // MARK: - inlineResultView
@@ -69,16 +102,11 @@ final class QuranPlugin: FeaturePlugin {
         }
 
         // Sticky: do not recompute while a verse is on screen. Only look for
-        // a new match when nothing is currently shown.
+        // a new match when nothing is currently shown. The match itself runs
+        // off the main actor (see `scheduleMatch`) so this call returns at
+        // once and never blocks the camera/UI.
         if model.match == nil, snapshotLoaded {
-            if let found = QuranMatcher.bestMatch(
-                result.original,
-                all: ayat,
-                tokenIndex: tokenIndex
-            ), !isSuppressed(found) {
-                model.match = found
-                model.surahName = surahNames[found.ayah.surah]
-            }
+            scheduleMatch(for: result.original)
         } else if !snapshotLoaded {
             preloadSnapshot()
         }
@@ -135,10 +163,47 @@ final class QuranPlugin: FeaturePlugin {
         model.match = nil
         model.surahName = nil
         presentedMatchId = nil
+        // Allow the same frame text to be re-scanned once the cooldown ends.
+        lastScheduledQuery = nil
     }
 
     private func isSuppressed(_ match: QuranMatch) -> Bool {
         dismissedMatchId == match.id && Date() < dismissedUntil
+    }
+
+    // MARK: - Matching (off the main actor)
+
+    /// Runs `QuranMatcher.bestMatch` on a background executor and delivers
+    /// the result back on the main actor via the observed model. At most one
+    /// job runs at a time; while one is in flight new ticks are dropped (the
+    /// library re-ticks, so the next free slot uses fresher text).
+    private func scheduleMatch(for rawArabic: String) {
+        guard matchTask == nil else { return }
+        // Same frame text as the last scan → nothing new to find. Skipping
+        // this is what keeps the background scans off the OCR pipeline.
+        guard rawArabic != lastScheduledQuery else { return }
+        lastScheduledQuery = rawArabic
+        let snapshotAyat = ayat
+        let snapshotIndex = tokenIndex
+        matchTask = Task { [weak self] in
+            // `.utility`: must yield CPU to the Vision OCR pipeline so text
+            // detection is not starved.
+            let found = await Task.detached(priority: .utility) {
+                QuranMatcher.bestMatch(
+                    rawArabic,
+                    all: snapshotAyat,
+                    tokenIndex: snapshotIndex
+                )
+            }.value
+            guard let self else { return }
+            defer { self.matchTask = nil }
+            // Verse may have appeared (or been dismissed) while we computed.
+            guard self.model.match == nil else { return }
+            if let found, !self.isSuppressed(found) {
+                self.model.match = found
+                self.model.surahName = self.surahNames[found.ayah.surah]
+            }
+        }
     }
 
     // MARK: - Snapshot
