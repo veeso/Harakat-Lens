@@ -17,6 +17,11 @@ materialIconsExtended = "1.7.8"
 pinyin4j = "2.5.1"
 textRecognitionChinese = "16.0.1"
 translate = "17.0.3"
+biangbiangui = "v0.3.2"
+icu4j = "75.1"
+tesseract4android = "4.9.0"
+robolectric = "4.16"
+kotlinxCoroutinesTest = "1.11.0"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCore" }
@@ -48,6 +53,11 @@ org-json = { module = "org.json:json", version.ref = "orgJson" }
 pinyin4j = { module = "com.belerweb:pinyin4j", version.ref = "pinyin4j" }
 text-recognition-chinese = { module = "com.google.mlkit:text-recognition-chinese", version.ref = "textRecognitionChinese" }
 translate = { module = "com.google.mlkit:translate", version.ref = "translate" }
+biangbiang-ui = { module = "com.github.veeso:BiangBiangUI", version.ref = "biangbiangui" }
+icu4j = { module = "com.ibm.icu:icu4j", version.ref = "icu4j" }
+tesseract4android = { module = "cz.adaptech.tesseract4android:tesseract4android", version.ref = "tesseract4android" }
+robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinxCoroutinesTest" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
