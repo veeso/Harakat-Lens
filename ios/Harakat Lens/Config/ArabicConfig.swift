@@ -9,6 +9,7 @@
 //
 
 import BiangBiangUI
+internal import CoreFoundation
 
 enum ArabicConfig {
     @MainActor
@@ -54,6 +55,7 @@ enum ArabicConfig {
             "inputTitle": "Arabic",
             "outputTitle": "Transliteration",
             "appSubtitle": "Transliterate Arabic",
-        ]
+        ],
+        minimumOcrScaleFactor: 0.5,
     )
 }
