@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en_US" class="dark">
+<html lang="en_US">
 
 <head>
   <title>
@@ -15,6 +15,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#f5efe3" />
   <meta property="og:image" content="https://harakatlens.app/assets/images/og_preview.jpeg" />
   <meta property="og:image:type" content="image/jpeg" />
   <meta property="og:image:width" content="1280" />
@@ -23,6 +24,12 @@
   <meta property="og:site_name" content="Harakat Lens" />
   <meta property="og:locale" content="en_US" />
   <meta property="og:url" content="https://harakatlens.app" />
+  <!-- Fonts: Sora (body, self-hosted in output.css) + Fraunces & Amiri (display) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..600&family=Amiri:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+    rel="stylesheet" />
   <!-- tailwind -->
   <link href="output.css" rel="stylesheet" />
   <!-- Favicons -->
@@ -60,100 +67,275 @@
 </head>
 
 <body>
-  <main class="min-h-screen  bg-brand">
-
-    <!-- Title -->
-    <div class="flex flex-col gap-4 items-center justify-center">
-      <div>
-        <img src="assets/images/logo.png" alt="Harakat Lens Logo" class="w-64 h-64 sm:w-32 sm:h-32 mx-auto mb-4" />
-      </div>
-      <h1 class="text-3xl font-bold text-center text-white mb-2">Harakat حركات Lens</h1>
-      <p class="text-center text-white text-xl mb-6 px-4">Instantly read and transliterate Arabic text with built-in OCR
-      </p>
-    </div>
-
-    <!-- Download buttons -->
-    <div class="flex items-center justify-center pb-8">
-      <a href="https://apps.apple.com/app/id6767614189" target="_blank" rel="noopener noreferrer">
-        <img src="assets/images/app_store.svg" alt="Download on the App Store" class="h-20 sm:h-10" />
+  <!-- ───────────────────────── Header ───────────────────────── -->
+  <header class="site-header sticky top-0 z-50 border-b border-[var(--line)] backdrop-blur">
+    <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+      <a href="index.html" class="flex items-center gap-3">
+        <img src="assets/images/logo.png" alt="Harakat Lens app logo" width="40" height="40"
+          class="h-10 w-10 rounded-xl" />
+        <span class="font-display text-lg font-semibold tracking-tight text-[var(--ink)]">Harakat Lens</span>
       </a>
     </div>
+  </header>
 
-    <!-- Screenshots -->
-    <div class="grid grid-cols-2 sm:grid-cols-1 items-center justify-around w-full gap-4 p-4 h-fit">
-      <div class="flex items-center justify-center">
+  <main class="overflow-hidden">
+
+    <!-- ───────────────────────── Hero ───────────────────────── -->
+    <section class="relative mx-auto max-w-6xl px-6 pb-20 pt-14 sm:pt-10">
+      <!-- Giant ghost character watermark -->
+      <span aria-hidden="true"
+        class="font-ar ghost-drift pointer-events-none absolute -right-8 -top-10 select-none text-[26rem] font-black leading-none text-[var(--brand)] opacity-[0.06] sm:text-[14rem] sm:-right-4">ح</span>
+
+      <div class="relative grid grid-cols-2 items-center gap-12 sm:grid-cols-1 sm:gap-8">
+        <!-- Copy -->
         <div>
-          <img src="assets/images/preview.webp" width="1320" height="2868" alt="App Screenshot 1"
-            class="w-auto p-2 h-[720px]" />
+          <p class="eyebrow reveal reveal-d1">حركات · عربي · Latin</p>
+          <h1 class="reveal reveal-d2 mt-5 font-display text-[4.2rem] font-black leading-[0.95] tracking-tight text-[var(--ink)] sm:text-[3rem]">
+            Read any<br />Arabic.<br />
+            <span class="text-[var(--brand)]">Instantly.</span>
+          </h1>
+          <p class="reveal reveal-d3 mt-6 max-w-md text-lg leading-relaxed text-[var(--ink-soft)]">
+            The free Arabic transliteration and OCR app for iPhone.
+            Type it, paste it, or point your camera at it — get the Latin reading with full harakat in a tap.
+          </p>
+
+          <!-- Live conversion demo line -->
+          <div class="reveal reveal-d3 mt-7 inline-flex max-w-full flex-wrap items-center gap-x-4 gap-y-2 paper-card px-5 py-3">
+            <span class="font-ar whitespace-nowrap text-3xl font-semibold text-[var(--ink)]" lang="ar" dir="rtl">مَرْحَبًا</span>
+            <span class="whitespace-nowrap text-2xl text-[var(--brand)]" aria-hidden="true">→</span>
+            <span class="font-display whitespace-nowrap text-2xl italic text-[var(--ink-soft)]">marḥaban</span>
+          </div>
+
+          <!-- Download buttons -->
+          <div id="download" class="reveal reveal-d4 mt-9 flex flex-wrap items-center gap-3">
+            <a href="https://apps.apple.com/app/id6767614189" target="_blank" rel="noopener noreferrer">
+              <img src="assets/images/app_store.svg" alt="Download on the App Store" class="h-14" />
+            </a>
+          </div>
+          <p class="reveal reveal-d5 mt-4 text-sm text-[var(--ink-soft)]">
+            Free · On-device · No account · Native iOS
+          </p>
+        </div>
+
+        <!-- Phone preview -->
+        <div class="reveal reveal-d3 flex justify-center">
+          <div class="device-frame w-[300px] max-w-full sm:w-[230px]">
+            <img src="assets/images/preview.webp" width="1320" height="2868"
+              alt="Harakat Lens app showing Arabic transliterated to Latin with harakat" />
+          </div>
         </div>
       </div>
-      <div class="flex items-center justify-center">
-        <div>
-          <img src="assets/images/camera_ocr.webp" width="1320" height="2868" alt="App Camera OCR"
-            class="w-auto p-2 h-[720px]" />
-        </div>
+    </section>
+
+    <!-- ───────────────────── Marquee strip ───────────────────── -->
+    <div class="border-y border-[var(--line)] bg-[var(--paper-2)] py-4">
+      <div class="marquee items-center gap-10 text-xl">
+        <!-- duplicated once for a seamless 50% loop -->
+        <span class="flex shrink-0 items-center gap-10 px-5 text-[var(--ink-soft)]">
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">مرحبا</span> marḥaban</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">شكرا</span> shukran</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">كتاب</span> kitāb</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">قرآن</span> qurʾān</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">حركات</span> ḥarakāt</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">عربي</span> ʿarabī</span>
+          <span class="text-[var(--brand)]">·</span>
+        </span>
+        <span class="flex shrink-0 items-center gap-10 px-5 text-[var(--ink-soft)]" aria-hidden="true">
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">مرحبا</span> marḥaban</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">شكرا</span> shukran</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">كتاب</span> kitāb</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">قرآن</span> qurʾān</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">حركات</span> ḥarakāt</span>
+          <span class="text-[var(--brand)]">·</span>
+          <span><span class="font-ar text-[var(--ink)]" lang="ar" dir="rtl">عربي</span> ʿarabī</span>
+          <span class="text-[var(--brand)]">·</span>
+        </span>
       </div>
     </div>
 
-    <!-- SEO description -->
-    <section class="w-8/12 mx-auto px-6 py-12 text-white">
-      <h2 class="text-2xl font-bold mb-4">About Harakat Lens</h2>
-      <p class="mb-4 leading-relaxed">
-        Harakat Lens is a native iOS app for reading, transliterating, and translating
-        Arabic text on the go. Point your camera at a sign, book, menu, or any printed Arabic
-        script and the built-in OCR engine extracts the text in real time, then renders it in
-        Latin characters with full harakat (diacritic) support so you can pronounce every word
-        correctly — even if you do not yet read the Arabic alphabet.
-      </p>
-      <p class="mb-4 leading-relaxed">
-        Designed for travelers, students of Arabic, and Muslims around the world, Harakat Lens
-        also includes a dedicated Quran mode that automatically detects and matches scanned verses
-        against the full Quranic text, displaying the canonical reading alongside the translation.
-        On-device translation keeps your scans private and works without an internet connection
-        once language packs are downloaded.
-      </p>
-      <p class="leading-relaxed">
-        Whether you are decoding street signs in Cairo, studying Modern Standard Arabic, or
-        deepening your understanding of the Quran, Harakat Lens turns your phone into a fast,
-        accurate Arabic reading companion — powered by Apple Vision.
-      </p>
-    </section>
-  </main>
-  <footer class="bg-brand pt-16 pb-2 px-20 sm:px-4">
-    <div class="flex flex-col gap-8 items-center">
-      <div class="flex sm:flex-col sm:items-start items-center justify-between gap-8 w-full">
-        <!-- Links -->
-        <div class="flex flex-col gap-4">
-          <div>
-            <a href="index.html" class="text-white underline">Home</a>
-          </div>
-          <div>
-            <a href="privacy.html" class="text-white underline">Privacy Policy</a>
-          </div>
-          <div>
-            <a href="https://github.com/veeso/Harakat-Lens" class="text-white underline">Github</a>
-          </div>
+    <!-- ───────────────────── Features ───────────────────── -->
+    <section class="mx-auto max-w-6xl px-6 py-20">
+      <p class="eyebrow">What it does</p>
+      <h2 class="mt-4 max-w-2xl font-display text-[2.7rem] font-black leading-[1.05] text-[var(--ink)] sm:text-[1.9rem]">
+        Four ways to read Arabic with confidence.
+      </h2>
+
+      <div class="mt-12 grid grid-cols-2 gap-6 sm:grid-cols-1">
+        <div class="paper-card p-7">
+          <span class="seal h-12 w-12 text-2xl font-semibold">ح</span>
+          <h3 class="mt-5 font-display text-2xl font-bold text-[var(--ink)]">Harakat transliteration</h3>
+          <p class="mt-3 leading-relaxed text-[var(--ink-soft)]">
+            Convert Arabic script into accurate Latin transliteration with full harakat (diacritics) —
+            so you pronounce every vowel correctly, even if you don't read the Arabic alphabet yet.
+          </p>
         </div>
-        <!-- Legal -->
-        <div class="flex flex-col gap-4">
-          <div>
-            <span class="text-white">Christian Visintin</span>
-          </div>
-          <div>
-            <a href="mailto:info@veeso.dev" class="text-white underline">info@veeso.dev</a>
-          </div>
-          <div>
-            <span class="text-white">Via Marangoni 33, 33100, Udine, Italy</span>
-          </div>
-          <div>
-            <span class="text-white">IT03104140300</span>
-          </div>
+        <div class="paper-card p-7">
+          <span class="seal h-12 w-12 text-2xl font-semibold">ع</span>
+          <h3 class="mt-5 font-display text-2xl font-bold text-[var(--ink)]">Live camera OCR</h3>
+          <p class="mt-3 leading-relaxed text-[var(--ink-soft)]">
+            Point your phone at a sign, menu, or book page. Apple Vision reads Arabic in
+            real time and overlays each line with its transliteration. Works on gallery photos too.
+          </p>
+        </div>
+        <div class="paper-card p-7">
+          <span class="seal h-12 w-12 text-2xl font-semibold">ق</span>
+          <h3 class="mt-5 font-display text-2xl font-bold text-[var(--ink)]">Quran verse matching</h3>
+          <p class="mt-3 leading-relaxed text-[var(--ink-soft)]">
+            Quran mode detects scanned verses and matches them against the full Quranic text,
+            showing the canonical reading alongside the translation and recitation.
+          </p>
+        </div>
+        <div class="paper-card p-7">
+          <span class="seal h-12 w-12 text-2xl font-semibold">ت</span>
+          <h3 class="mt-5 font-display text-2xl font-bold text-[var(--ink)]">On-device translate</h3>
+          <p class="mt-3 leading-relaxed text-[var(--ink-soft)]">
+            Translate Arabic into your language locally with the iOS Translation framework — no
+            internet, no servers, no account. Your text and images never leave the phone.
+          </p>
         </div>
       </div>
-      <div class="flex flex-col items-center">
-        <div>
-          <span class="text-white text-xs">Copyright © <span id="copyright-year">2026</span> Christian Visintin</span>
+    </section>
+
+    <!-- ───────────────────── Screenshots showcase ───────────────────── -->
+    <section class="relative border-y border-[var(--line)] bg-[var(--paper-2)] py-20">
+      <span aria-hidden="true"
+        class="font-ar pointer-events-none absolute -left-10 top-6 select-none text-[18rem] font-black leading-none text-[var(--brand)] opacity-[0.05] sm:hidden">ق</span>
+      <div class="relative mx-auto max-w-6xl px-6">
+        <p class="eyebrow">See it in action</p>
+        <h2 class="mt-4 max-w-2xl font-display text-[2.7rem] font-black leading-[1.05] text-[var(--ink)] sm:text-[1.9rem]">
+          From characters to camera, in one tap.
+        </h2>
+        <div class="mt-12 grid grid-cols-2 items-start justify-items-center gap-10 sm:grid-cols-1">
+          <figure class="flex flex-col items-center">
+            <div class="device-frame w-[280px] max-w-full sm:w-[230px]">
+              <img src="assets/images/preview.webp" width="1320" height="2868"
+                alt="Arabic to Latin transliteration screen with harakat" />
+            </div>
+            <figcaption class="mt-5 text-center text-[var(--ink-soft)]">Type or paste — instant transliteration.</figcaption>
+          </figure>
+          <figure class="flex flex-col items-center">
+            <div class="device-frame w-[280px] max-w-full sm:w-[230px]">
+              <img src="assets/images/camera_ocr.webp" width="1320" height="2868"
+                alt="Live camera OCR scanning Arabic text and showing transliteration" />
+            </div>
+            <figcaption class="mt-5 text-center text-[var(--ink-soft)]">Scan the world around you.</figcaption>
+          </figure>
         </div>
+      </div>
+    </section>
+
+    <!-- ───────────────────── SEO content ───────────────────── -->
+    <section class="mx-auto max-w-3xl px-6 py-20 text-[var(--ink)]">
+      <h2 class="font-display text-[1.9rem] font-bold">Transliterate Arabic in seconds</h2>
+      <p class="mb-4 mt-4 leading-relaxed text-[var(--ink-soft)]">
+        Harakat Lens is a free, native iOS app that turns Arabic script into accurate Latin
+        transliteration with full harakat (diacritic) support. Paste or type any Arabic text —
+        a sentence, a sign, a chat message, a Quranic verse — and read it back in Latin
+        characters so you can pronounce every word correctly, even if you don't yet read the
+        Arabic alphabet. Non-Arabic characters such as Latin letters, numbers, punctuation and
+        emoji are preserved in place, so mixed-language text stays readable.
+      </p>
+      <p class="mb-4 leading-relaxed text-[var(--ink-soft)]">
+        The app is built natively for iPhone and iPad with SwiftUI, using Apple's on-device
+        OCR and translation engines for speed, privacy and offline support. It feels at home on
+        iOS and keeps your scans on the device.
+      </p>
+
+      <h2 class="mt-12 font-display text-[1.9rem] font-bold">Scan Arabic text with OCR from photos and live camera</h2>
+      <p class="mb-4 mt-4 leading-relaxed text-[var(--ink-soft)]">
+        Point your phone at an Arabic sign, restaurant menu, book page or product label and
+        Harakat Lens will read the text for you. The OCR engine — Apple Vision — recognizes
+        Arabic in real time from the camera feed, and you can also pick a photo from your
+        gallery. Each detected line is shown with its transliteration, making it easy to study,
+        pronounce, or look up unfamiliar Arabic on the spot.
+      </p>
+
+      <h2 class="mt-12 font-display text-[1.9rem] font-bold">Match and read Quran verses</h2>
+      <p class="mb-4 mt-4 leading-relaxed text-[var(--ink-soft)]">
+        A dedicated Quran mode automatically detects scanned or typed verses and matches them
+        against the full Quranic text. When a verse is recognized, Harakat Lens shows the
+        canonical reading alongside the surah and ayah reference, the translation, and audio
+        recitation — turning your phone into a pocket companion for studying the Quran.
+      </p>
+
+      <h2 class="mt-12 font-display text-[1.9rem] font-bold">Translate Arabic to your language</h2>
+      <p class="mb-4 mt-4 leading-relaxed text-[var(--ink-soft)]">
+        Beyond pronunciation, Harakat Lens can translate Arabic text into your preferred
+        language using the on-device iOS Translation framework. Translations run locally once the
+        language pack is downloaded, so the feature works offline and never sends your text to a
+        third-party server.
+      </p>
+
+      <h2 class="mt-12 font-display text-[1.9rem] font-bold">Who is it for?</h2>
+      <ul class="mb-4 mt-4 list-disc list-inside space-y-2 text-[var(--ink-soft)] marker:text-[var(--brand)]">
+        <li>Arabic learners who need quick, vowelled readings while studying.</li>
+        <li>Travelers in the Arab world who need to read signs, menus and labels.</li>
+        <li>Muslims who want to identify, read and listen to Quran verses on the go.</li>
+        <li>Anyone who receives Arabic messages, documents or photos and wants to understand them.</li>
+      </ul>
+
+      <h2 class="mt-12 font-display text-[1.9rem] font-bold">Key features</h2>
+      <ul class="mb-4 mt-4 list-disc list-inside space-y-2 text-[var(--ink-soft)] marker:text-[var(--brand)]">
+        <li>Arabic to Latin transliteration with full harakat (e.g. marḥaban for مَرْحَبًا).</li>
+        <li>OCR from photos and from the live camera feed, powered by Apple Vision.</li>
+        <li>Quran mode with automatic verse matching, translation and recitation.</li>
+        <li>On-device translation with the iOS Translation framework — works offline.</li>
+        <li>Mixed Arabic and Latin text preserved in place.</li>
+        <li>No account, no servers — your scans stay on the device.</li>
+        <li>Native iOS (SwiftUI) app for iPhone and iPad.</li>
+      </ul>
+
+      <h2 class="mt-12 font-display text-[1.9rem] font-bold">Why it is called Harakat Lens</h2>
+      <p class="mb-4 mt-4 leading-relaxed text-[var(--ink-soft)]">
+        <em>Harakat</em> (حركات) are the short-vowel diacritics of the Arabic script — the marks
+        that tell you exactly how a word is pronounced. <em>Lens</em> is the camera that reads
+        them for you. Together they describe what the app does: look at Arabic through your phone
+        and see it come back fully vowelled and ready to read.
+      </p>
+
+      <!-- Final CTA -->
+      <div class="mt-12 flex flex-wrap items-center gap-3">
+        <a href="https://apps.apple.com/app/id6767614189" target="_blank" rel="noopener noreferrer">
+          <img src="assets/images/app_store.svg" alt="Download on the App Store" class="h-14" />
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ───────────────────────── Footer ───────────────────────── -->
+  <footer class="border-t border-[var(--line)] bg-[var(--paper-2)] px-6 pb-8 pt-16">
+    <div class="mx-auto flex max-w-6xl flex-col gap-10">
+      <div class="flex items-start justify-between gap-8 sm:flex-col">
+        <div class="flex items-center gap-3">
+          <img src="assets/images/logo.png" alt="Harakat Lens app logo" width="40" height="40"
+            class="h-10 w-10 rounded-xl" />
+          <span class="font-display text-lg font-semibold text-[var(--ink)]">Harakat Lens</span>
+        </div>
+        <!-- Links -->
+        <div class="flex flex-col gap-3">
+          <a href="index.html" class="text-[var(--ink-soft)] hover:text-[var(--brand)]">Home</a>
+          <a href="privacy.html" class="text-[var(--ink-soft)] hover:text-[var(--brand)]">Privacy Policy</a>
+          <a href="https://github.com/veeso/Harakat-Lens" class="text-[var(--ink-soft)] hover:text-[var(--brand)]">Github</a>
+        </div>
+        <!-- Legal -->
+        <div class="flex flex-col gap-3 text-[var(--ink-soft)]">
+          <span>Christian Visintin</span>
+          <a href="mailto:info@veeso.dev" class="hover:text-[var(--brand)]">info@veeso.dev</a>
+          <span>Via Marangoni 33, 33100, Udine, Italy</span>
+          <span>IT03104140300</span>
+        </div>
+      </div>
+      <div class="flex flex-col items-center gap-1 border-t border-[var(--line)] pt-6 text-center">
+        <span class="text-xs text-[var(--ink-soft)]">Copyright © <span id="copyright-year">2026</span> Christian Visintin</span>
       </div>
     </div>
   </footer>
